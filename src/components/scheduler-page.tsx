@@ -17,7 +17,6 @@ type FormData = z.infer<typeof formSchema>;
 
 const LOCAL_STORAGE_KEY = 'active-audition-agenda-form';
 
-// This is now an async component to allow for the artificial delay
 export default function SchedulerPage() {
   const [isClient, setIsClient] = useState(false);
   const [view, setView] = useState<"form" | "schedule">("form");
