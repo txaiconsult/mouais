@@ -152,7 +152,8 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                         <div key={day.name} className="flex flex-col gap-3 p-4 rounded-lg border bg-card/50">
                           <p className="font-medium text-2xl text-center capitalize">{day.label}</p>
                           <div className="grid grid-cols-1 gap-3">
-                             <Button
+                            {day.name !== 'samedi' && (
+                              <Button
                                 type="button"
                                 variant={selectedPreferences.includes(`${day.name} toute la journée`) ? 'default' : 'outline'}
                                 onClick={() => handlePreferenceToggle(day.name, 'toute la journée')}
@@ -161,6 +162,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                                 <Clock className="w-6 h-6" />
                                 <span>Toute la journée</span>
                               </Button>
+                            )}
                             <Button
                               type="button"
                               variant={selectedPreferences.includes(`${day.name} matin`) ? 'default' : 'outline'}
