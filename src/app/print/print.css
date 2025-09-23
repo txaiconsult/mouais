@@ -49,31 +49,45 @@
     /* Reduce padding on elements to save vertical space for printing */
     .print-content .p-6,
     .print-content .p-10 {
-        padding: 0.5rem !important;
+        padding: 0 !important;
     }
     
     .print-content .pt-8 {
-        padding-top: 1rem !important;
+        padding-top: 0 !important;
     }
     
     .print-content .mb-12 {
-        margin-bottom: 1.5rem !important; /* was 3rem */
+        margin-bottom: 1.25rem !important; /* was 3rem */
     }
 
     .print-content .space-y-10 > * + * {
-        margin-top: 1.25rem !important; /* was space-y-10 -> 2.5rem */
+        margin-top: 1rem !important; /* was space-y-10 -> 2.5rem */
     }
 
     .print-content .info-card {
         padding: 1rem !important;
+        margin-top: 1rem !important;
     }
     
     .print-content .mb-6 {
-        margin-bottom: 0.75rem !important; /* was 1.5rem */
+        margin-bottom: 0.5rem !important; /* was 1.5rem */
     }
     
     .print-content .space-y-4 > * + * {
         margin-top: 0.5rem !important; /* was space-y-4 -> 1rem */
+    }
+    
+    .print-content .mb-4 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .print-content .grid-cols-1,
+    .print-content .md\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .print-content .gap-4 {
+        gap: 0.5rem !important;
     }
 
     .no-print, .no-print * {
