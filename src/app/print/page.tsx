@@ -8,7 +8,7 @@ import { fr } from "date-fns/locale";
 import type { Appointment } from "@/types/appointment";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Calendar as CalendarIcon } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, Info, CheckCircle, BrainCircuit } from "lucide-react";
 import { motion } from "framer-motion";
 
 const PRINT_STORAGE_KEY = 'schedulewise-print-data';
@@ -85,7 +85,7 @@ export default function PrintPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 md:p-10">
-            <div className="relative pl-8">
+            <div className="relative pl-8 mb-12">
               <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border -z-10"></div>
               <ul className="space-y-8">
                 {appointments.map((apt) => {
@@ -111,6 +111,48 @@ export default function PrintPage() {
                 })}
               </ul>
             </div>
+            
+            <div className="bg-primary/5 border border-primary/10 rounded-xl p-6">
+                <h3 className="font-headline text-2xl text-primary mb-2 flex items-center gap-2"><BrainCircuit className="w-6 h-6"/>Suivi J+7, J+14, J+21 et J+30 — pour une adaptation réussie</h3>
+                <p className="text-muted-foreground mb-6"><strong>Démarrage en douceur (volontaire):</strong> on commence en sous‑correction pour laisser votre cerveau se réhabituer sans fatigue ni gêne.</p>
+
+                <ul className="space-y-4 mb-6">
+                    <li className="flex items-start gap-3">
+                        <div className="font-bold text-primary pt-1">J+7:</div>
+                        <p className="text-foreground">premiers retours, confort, prise en main et entretien; légère montée vers la cible.</p>
+                    </li>
+                    <li className="flex items-start gap-3">
+                        <div className="font-bold text-primary pt-1">J+14:</div>
+                        <p className="text-foreground">affiner clarté et réduction du bruit selon vos situations (travail, famille, téléphone).</p>
+                    </li>
+                    <li className="flex items-start gap-3">
+                        <div className="font-bold text-primary pt-1">J+21:</div>
+                        <p className="text-foreground">validations en conditions réelles, équilibre entre les deux oreilles; on s’approche du réglage final.</p>
+                    </li>
+                    <li className="flex items-start gap-3">
+                        <div className="font-bold text-primary pt-1">J+30:</div>
+                        <p className="text-foreground">bilan, stabilisation et plan de suivi périodique.</p>
+                    </li>
+                </ul>
+
+                <h4 className="font-headline text-xl text-primary mb-2 flex items-center gap-2"><Info className="w-5 h-5"/>Pourquoi c’est important</h4>
+                <p className="text-muted-foreground mb-4">Votre présence à ces 4 rendez‑vous représente une grande part de la réussite (souvent 50–60%). Plus on avance ensemble, plus vite on atteint un confort durable et une meilleure compréhension.</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div className="bg-background/50 p-4 rounded-lg">
+                        <p className="font-semibold text-foreground">Porter vos aides chaque jour</p>
+                        <p className="text-sm text-muted-foreground">autant que possible.</p>
+                    </div>
+                    <div className="bg-background/50 p-4 rounded-lg">
+                        <p className="font-semibold text-foreground">Noter 2–3 situations à améliorer</p>
+                        <p className="text-sm text-muted-foreground">entre chaque visite.</p>
+                    </div>
+                    <div className="bg-background/50 p-4 rounded-lg">
+                        <p className="font-semibold text-foreground">En cas d’imprévu, on reprogramme</p>
+                        <p className="text-sm text-muted-foreground">l’important est de garder la progression.</p>
+                    </div>
+                </div>
+            </div>
+
           </CardContent>
         </Card>
       </motion.div>
