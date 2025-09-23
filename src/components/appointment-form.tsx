@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw, CheckCircle, User, ShieldCheck, Users, ChevronRight, Search, UserRoundPlus, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw, CheckCircle, User, Users, ChevronRight, Search, UserRoundPlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -300,7 +300,7 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, onDeletePati
                               className="flex flex-col items-center justify-center p-3 rounded-lg border bg-card/80 gap-3 cursor-pointer"
                               onClick={() => setActiveDay(activeDay === day.name ? null : day.name)}
                             >
-                              <span className="text-xl font-semibold capitalize">{day.label}</span>
+                              <span className="text-2xl font-bold capitalize text-primary">{day.label}</span>
                               <AnimatePresence>
                               {activeDay === day.name && (
                                 <motion.div 
