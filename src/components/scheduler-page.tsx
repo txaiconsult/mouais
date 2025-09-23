@@ -136,9 +136,7 @@ export default function SchedulerPage() {
         </div>
       </main>
       <footer className="mt-12 flex flex-col items-center justify-center gap-2">
-        <div className="flex items-center gap-3">
-          <Logo className="w-[150px] h-auto opacity-60" />
-        </div>
+        <Logo className="w-[150px] h-auto opacity-60" />
         <p className="text-xs text-muted-foreground">Agenda de suivi auditif</p>
       </footer>
     </div>
