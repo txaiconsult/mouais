@@ -92,7 +92,7 @@ export default function PrintPage() {
           </CardHeader>
           <CardContent className="p-6 md:p-10">
             <div className="relative pl-8 print:mt-8">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 timeline-line -z-10"></div>
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 timeline-line -z-10" style={{ printColorAdjust: 'exact' }}></div>
               <ul className="space-y-10">
                 {appointments.map((apt, index) => {
                   const [displayDescription, shiftInfo] = cleanDescriptionForDisplay(apt.description);
@@ -167,7 +167,7 @@ export default function PrintPage() {
             </div>
 
           </CardContent>
-          <footer className="mt-12 flex flex-col items-center justify-center gap-2">
+          <footer className="mt-8 flex flex-col items-center justify-center gap-2 print:mt-4">
             <Logo className="w-[150px] h-auto opacity-60" />
             <p className="text-xs text-muted-foreground">Agenda de suivi auditif</p>
           </footer>
