@@ -8,7 +8,7 @@ import { fr } from "date-fns/locale";
 import type { Appointment } from "@/types/appointment";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Calendar as CalendarIcon, Info, BrainCircuit } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, Info, BrainCircuit, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 
 const PRINT_STORAGE_KEY = 'schedulewise-print-data';
@@ -87,7 +87,7 @@ export default function PrintPage() {
           <CardContent className="p-6 md:p-10">
             <div className="relative pl-8 mb-12">
               <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border -z-10"></div>
-              <ul className="space-y-8">
+              <ul className="space-y-10">
                 {appointments.map((apt) => {
                   const [displayDescription, shiftInfo] = cleanDescriptionForDisplay(apt.description);
                   return (
@@ -97,9 +97,16 @@ export default function PrintPage() {
                           <CalendarIcon className="h-4 w-4 text-primary" />
                         </div>
                         <div className="flex-grow">
-                          <p className="font-semibold text-lg text-foreground capitalize">
-                            {format(new Date(apt.date), "EEEE d MMMM yyyy", { locale: fr })}
-                          </p>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                              <p className="font-semibold text-lg text-foreground capitalize">
+                                {format(new Date(apt.date), "EEEE d MMMM yyyy", { locale: fr })}
+                              </p>
+                              <div className="flex items-center gap-2 text-muted-foreground mt-2 sm:mt-0">
+                                <Clock className="w-4 h-4" />
+                                <span className="font-semibold">Heure :</span>
+                                <span className="border-b-2 border-dotted border-current flex-grow min-w-[100px]"></span>
+                              </div>
+                          </div>
                           <p className="text-base text-muted-foreground">
                             {displayDescription}
                             {shiftInfo && <span className="text-xs text-amber-700 ml-2 bg-amber-100 px-1.5 py-0.5 rounded-full">{shiftInfo}</span>}
@@ -136,7 +143,7 @@ export default function PrintPage() {
                 </ul>
 
                 <h4 className="font-headline text-xl text-primary mb-2 flex items-center gap-2"><Info className="w-5 h-5"/>Pourquoi c’est important</h4>
-                <p className="text-muted-foreground mb-4">Votre présence à ces 4 rendez‑vous représente une grande part de la réussite (souvent 50–60%). Votre participation active à ces rendez-vous est la clé pour atteindre rapidement un confort d'écoute optimal et une meilleure compréhension au quotidien.</p>
+                <p className="text-muted-foreground mb-4">Votre participation active à ces rendez-vous est la clé pour atteindre rapidement un confort d'écoute optimal et une meilleure compréhension au quotidien.</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div className="bg-background/50 p-4 rounded-lg">
                         <p className="font-semibold text-foreground">Porter vos aides chaque jour</p>
@@ -159,3 +166,5 @@ export default function PrintPage() {
     </div>
   );
 }
+
+    
