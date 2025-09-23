@@ -49,7 +49,7 @@
     /* Reduce padding on elements to save vertical space for printing */
     .print-content .p-6,
     .print-content .p-10 {
-        padding: 1.5rem !important;
+        padding: 0.5rem !important;
     }
     
     .print-content .pt-8 {
@@ -57,19 +57,23 @@
     }
     
     .print-content .mb-12 {
-        margin-bottom: 2rem !important;
+        margin-bottom: 1.5rem !important; /* was 3rem */
     }
 
     .print-content .space-y-10 > * + * {
-        margin-top: 1.5rem !important; /* was space-y-10 */
+        margin-top: 1.25rem !important; /* was space-y-10 -> 2.5rem */
     }
 
     .print-content .info-card {
-        padding: 1.5rem !important;
+        padding: 1rem !important;
     }
     
     .print-content .mb-6 {
-        margin-bottom: 1rem !important;
+        margin-bottom: 0.75rem !important; /* was 1.5rem */
+    }
+    
+    .print-content .space-y-4 > * + * {
+        margin-top: 0.5rem !important; /* was space-y-4 -> 1rem */
     }
 
     .no-print, .no-print * {
