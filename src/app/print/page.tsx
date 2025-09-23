@@ -84,7 +84,7 @@ export default function PrintPage() {
               </Button>
             </div>
             <CardTitle className="font-headline text-3xl md:text-4xl">
-              Votre parcours de suivi, <span className="text-primary">{patientName}</span>
+              Vos actives dates clefs, <span className="text-primary">{patientName}</span>
             </CardTitle>
             <CardDescription className="text-lg md:text-xl">
               Départ des appareils le {format(new Date(startDate), "d MMMM yyyy", { locale: fr })}
