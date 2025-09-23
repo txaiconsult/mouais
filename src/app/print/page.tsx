@@ -76,13 +76,13 @@ export default function PrintPage() {
   return (
     <div className="print-container bg-background">
         <div className="print-content">
-          <div className="absolute top-4 right-4 no-print">
-            <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
-              <ArrowLeft />
-              <span className="sr-only">Retour</span>
-            </Button>
-          </div>
           <CardHeader className="text-center relative pt-8 md:pt-16">
+            <div className="absolute top-4 right-4 no-print">
+              <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
+                <ArrowLeft />
+                <span className="sr-only">Retour</span>
+              </Button>
+            </div>
             <CardTitle className="font-headline text-3xl md:text-4xl">
               Vos <span style={gradientStyle}>actives</span> dates clefs, <span className="text-primary">{patientName}</span>
             </CardTitle>
@@ -145,7 +145,7 @@ export default function PrintPage() {
                 </ul>
 
                 <h4 className="font-headline text-xl text-primary mb-2 flex items-center gap-2"><Info className="w-5 h-5"/>Pourquoi c’est important</h4>
-                <p className="text-muted-foreground mb-4">Votre participation active à ces rendez-vous est la clé pour vous assurer le succès.</p>
+                <p className="text-muted-foreground mb-4">Votre participation active à ces rendez-vous est la clé du succès : elle est essentielle pour atteindre rapidement un confort d'écoute optimal et une meilleure compréhension au quotidien.</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div className="bg-background/50 p-4 rounded-lg">
                         <p className="font-semibold text-foreground">Porter vos aides chaque jour</p>
