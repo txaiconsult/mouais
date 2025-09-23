@@ -76,8 +76,7 @@ export default function PrintPage() {
   return (
     <div className="print-container bg-background">
         <div className="print-content">
-          <header className="flex justify-between items-center mb-8 pt-4">
-            <Logo className="w-[200px] h-auto" />
+          <header className="flex justify-between items-center mb-8 pt-4 h-14">
             <div className="absolute top-4 right-4 no-print">
               <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
                 <ArrowLeft />
