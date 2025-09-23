@@ -144,8 +144,8 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
+          <div className="grid grid-cols-1">
+              <div>
                   <Card className="w-full">
                       <CardHeader className="text-center relative">
                       <div className="flex justify-end items-start absolute top-4 right-4">
@@ -266,26 +266,6 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                           Imprimer le parcours
                       </Button>
                       </CardFooter>
-                  </Card>
-              </div>
-              
-              <div className="hidden lg:block">
-                  <Card>
-                      <CardContent className="flex justify-center p-0 pt-6">
-                          <Calendar
-                              mode="multiple"
-                              selected={appointmentDates}
-                              month={startDate}
-                              locale={fr}
-                              className="w-full"
-                              classNames={{ 
-                                  caption_label: "text-lg", 
-                                  day: "h-10 w-10", 
-                                  head_cell: "w-10",
-                                  day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90",
-                              }}
-                          />
-                      </CardContent>
                   </Card>
               </div>
           </div>

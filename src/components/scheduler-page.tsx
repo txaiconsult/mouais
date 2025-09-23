@@ -109,8 +109,8 @@ export default function SchedulerPage() {
         <h1 className="text-3xl font-bold font-headline text-foreground">Active Audition Agenda</h1>
       </header>
 
-      <main className="grid grid-cols-1 lg:grid-cols-2 lg:gap-8 transition-all duration-500 ease-in-out">
-        <div className={`transition-all duration-500 ${view === 'schedule' ? 'lg:opacity-0 lg:max-h-0 lg:overflow-hidden lg:p-0 lg:m-0' : 'lg:opacity-100 lg:max-h-full'}`}>
+      <main className="grid grid-cols-1 lg:gap-8 transition-all duration-500 ease-in-out">
+        <div className={`transition-all duration-500 ${view === 'schedule' ? 'lg:hidden' : 'lg:block'}`}>
           <AppointmentForm
             onSuggest={handleSuggest}
             isLoading={isLoading}
@@ -120,7 +120,7 @@ export default function SchedulerPage() {
         
         <div className={`transition-all duration-500 ${view === 'schedule' ? 'lg:col-span-2' : ''}`}>
           {view === "form" && (
-            <Card className="flex h-full min-h-[500px] w-full items-center justify-center border-2 border-dashed bg-card/50">
+            <Card className="hidden lg:flex h-full min-h-[500px] w-full items-center justify-center border-2 border-dashed bg-card/50">
               <CardContent className="text-center text-muted-foreground p-6">
                 <Calendar className="mx-auto h-12 w-12 mb-4" />
                 <h2 className="text-xl font-semibold font-headline">En attente d'informations</h2>
