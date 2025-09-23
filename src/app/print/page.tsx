@@ -8,10 +8,10 @@ import { fr } from "date-fns/locale";
 import type { Appointment } from "@/types/appointment";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Calendar as CalendarIcon, Info, BrainCircuit, Clock } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, Info, BrainCircuit } from "lucide-react";
 import { motion } from "framer-motion";
 
-const PRINT_STORAGE_KEY = 'schedulewise-print-data';
+const PRINT_STORAGE_KEY = 'active-audition-agenda-print-data';
 
 interface PrintData {
   patientName: string;

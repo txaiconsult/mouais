@@ -1,6 +1,6 @@
-# ScheduleWise
+# Active Audition Agenda
 
-ScheduleWise est une application web qui permet de planifier des rendez-vous de suivi pour des patients en utilisant une IA pour suggérer des dates.
+Active Audition Agenda est une application web qui permet de planifier des rendez-vous de suivi pour des patients en utilisant une IA pour suggérer des dates.
 
 ## Fonctionnalités
 
@@ -28,7 +28,7 @@ ScheduleWise est une application web qui permet de planifier des rendez-vous de 
 1.  **Cloner le dépôt**
     ```bash
     git clone <repository-url>
-    cd ScheduleWise
+    cd Active-Audition-Agenda
     ```
 
 2.  **Installer les dépendances**

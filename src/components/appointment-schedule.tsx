@@ -22,7 +22,7 @@ interface AppointmentScheduleProps {
   onPatientNameChange: (name: string) => void;
 }
 
-const PRINT_STORAGE_KEY = 'schedulewise-print-data';
+const PRINT_STORAGE_KEY = 'active-audition-agenda-print-data';
 
 export default function AppointmentSchedule({ initialPatientName, startDate, initialAppointments, onBack, onPatientNameChange }: AppointmentScheduleProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);

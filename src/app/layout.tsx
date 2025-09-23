@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'ScheduleWise',
+  title: 'Active Audition Agenda',
   description: 'Planifiez facilement vos rendez-vous de suivi.',
 };
 
