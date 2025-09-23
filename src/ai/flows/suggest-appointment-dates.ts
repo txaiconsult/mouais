@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {format, addDays, isWeekend, nextMonday, nextTuesday, nextWednesday, nextThursday, nextFriday} from 'date-fns';
+import {format, addDays, isWeekend, nextMonday, getDay, add, isSameDay} from 'date-fns';
 
 const SuggestAppointmentDatesInputSchema = z.object({
   startDate: z
@@ -72,71 +72,49 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
   },
   async input => {
     const startDate = new Date(input.startDate);
-    let appointmentDates = [];
-    let currentDate = addDays(startDate, 7);
+    const appointmentDates = [];
+    const intervals = [7, 14, 21, 30];
+    const descriptions = [
+        `Appointment #1 (J+7)`,
+        `Appointment #2 (J+14)`,
+        `Appointment #3 (J+21)`,
+        `Appointment #4 (J+30 & Facturation)`
+    ];
+    
+    const preferences = input.patientPreferences?.toLowerCase() || '';
+    const avoidTuesday = preferences.includes('not on mardi');
+    const avoidWednesday = preferences.includes('not on mercredi');
+    const avoidThursday = preferences.includes('not on jeudi');
+    const avoidFriday = preferences.includes('not on vendredi');
+    const avoidSaturday = preferences.includes('not on samedi');
 
-    for (let i = 1; i <= 4; i++) {
-      if (input.patientPreferences?.toLowerCase().includes('not on weekends')) {
-        if (isWeekend(currentDate)) {
-          currentDate = nextMonday(currentDate);
-        }
-      }
+    const isDateInvalid = (date: Date): boolean => {
+      const day = getDay(date); // Sunday is 0, Monday is 1, ..., Saturday is 6
+      
+      if (isWeekend(date)) return true; // Always avoid weekends
+      if (day === 2 && avoidTuesday) return true;
+      if (day === 3 && avoidWednesday) return true;
+      if (day === 4 && avoidThursday) return true;
+      if (day === 5 && avoidFriday) return true;
+      if (day === 6 && avoidSaturday) return true;
+      
+      return false;
+    };
 
-      // Apply specific day restrictions if the preferences include "not on [day]"
-      if (input.patientPreferences?.toLowerCase().includes('not on monday')) {
-        if (currentDate.getDay() === 1) {
-          currentDate = nextTuesday(currentDate);
-        }
-      }
-      if (input.patientPreferences?.toLowerCase().includes('not on tuesday')) {
-        if (currentDate.getDay() === 2) {
-          currentDate = nextWednesday(currentDate);
-        }
-      }
-      if (input.patientPreferences?.toLowerCase().includes('not on wednesday')) {
-        if (currentDate.getDay() === 3) {
-          currentDate = nextThursday(currentDate);
-        }
-      }
-      if (input.patientPreferences?.toLowerCase().includes('not on thursday')) {
-        if (currentDate.getDay() === 4) {
-          currentDate = nextFriday(currentDate);
-        }
-      }
-      if (input.patientPreferences?.toLowerCase().includes('not on friday')) {
-        if (currentDate.getDay() === 5) {
-          currentDate = addDays(currentDate, 3); // Skip to Monday
-        }
-      }
+    let lastDate = startDate;
 
-      let description = '';
-      switch (i) {
-        case 1:
-          description = `Appointment #1 (J+7)`;
-          break;
-        case 2:
-          description = `Appointment #2 (J+14)`;
-          break;
-        case 3:
-          description = `Appointment #3 (J+21)`;
-          break;
-        case 4:
-          description = `Appointment #4 (J+30 & Facturation)`;
-          break;
+    for (let i = 0; i < intervals.length; i++) {
+      let targetDate = addDays(startDate, intervals[i]);
+      
+      while (isDateInvalid(targetDate)) {
+        targetDate = addDays(targetDate, 1);
       }
 
       appointmentDates.push({
-        date: format(currentDate, 'yyyy-MM-dd'),
-        description: description,
+        date: format(targetDate, 'yyyy-MM-dd'),
+        description: descriptions[i],
       });
-
-      if (i === 1) {
-        currentDate = addDays(startDate, 14);
-      } else if (i === 2) {
-        currentDate = addDays(startDate, 21);
-      } else {
-        currentDate = addDays(startDate, 30);
-      }
+      lastDate = targetDate;
     }
 
     return {appointmentDates};
