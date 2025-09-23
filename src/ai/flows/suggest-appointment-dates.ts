@@ -83,9 +83,9 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
     outputSchema: SuggestAppointmentDatesOutputSchema,
   },
   async input => {
-    const startDate = new Date(input.startDate);
+    const j0 = new Date(input.startDate);
     const appointmentDates = [];
-    const intervals = [7, 14, 21, 30];
+    const intervals = [7, 7, 7, 9]; // Intervals between appointments
     const baseDescriptions = [
         `Rendez-vous #1`,
         `Rendez-vous #2`,
@@ -117,20 +117,35 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
       return isWeekend(date);
     };
 
+    let currentStartDate = j0;
+    let totalDaysFromJ0 = 0;
+
     for (let i = 0; i < intervals.length; i++) {
-      const initialTargetDate = addDays(startDate, intervals[i]);
+      totalDaysFromJ0 += intervals[i];
+      const initialTargetDate = addDays(currentStartDate, intervals[i]);
       let targetDate = new Date(initialTargetDate);
       
       while (isDateInvalid(targetDate)) {
         targetDate = addDays(targetDate, 1);
       }
+      
+      const absoluteBaseDate = addDays(j0, totalDaysFromJ0);
+      const dayDifference = differenceInDays(targetDate, absoluteBaseDate);
 
-      const wasAdjusted = !isSameDay(initialTargetDate, targetDate);
-      let intervalLabel = `(J+${intervals[i]})`;
-      if (wasAdjusted) {
-          const dayDifference = differenceInDays(targetDate, initialTargetDate);
-          intervalLabel = `(base J+${intervals[i]}, décalé de ${dayDifference} jour${dayDifference > 1 ? 's' : ''})`;
+      let intervalLabel: string;
+      if (dayDifference !== 0) {
+          const sign = dayDifference > 0 ? '+' : '';
+          const plural = Math.abs(dayDifference) > 1 ? 's' : '';
+          intervalLabel = `(~J+${totalDaysFromJ0}, décalé de ${sign}${dayDifference} jour${plural})`;
+      } else {
+          intervalLabel = `(J+${totalDaysFromJ0})`;
       }
+
+      if (i > 0) {
+        const daysFromPrevious = differenceInDays(targetDate, new Date(appointmentDates[i-1].date));
+        intervalLabel = `(+${daysFromPrevious}j) ` + intervalLabel;
+      }
+
 
       let description = `${baseDescriptions[i]} ${intervalLabel}`;
       
@@ -138,7 +153,6 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
         const day = getDay(targetDate);
         const slotsForDay = preferredSlots.filter(slot => slot.day === day);
         if (slotsForDay.length > 0) {
-          // Priority: all day > morning > afternoon
           const chosenSlot = slotsForDay.find(s => s.time === 'toute la journée') || slotsForDay.find(s => s.time === 'matin') || slotsForDay[0];
           const timeCapitalized = chosenSlot.time.charAt(0).toUpperCase() + chosenSlot.time.slice(1).replace(' la ', ' la ');
           description += ` - ${timeCapitalized}`;
@@ -149,6 +163,9 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
         date: format(targetDate, 'yyyy-MM-dd'),
         description: description,
       });
+
+      // The next appointment is calculated from the date of the current one
+      currentStartDate = targetDate;
     }
 
     return {appointmentDates};
