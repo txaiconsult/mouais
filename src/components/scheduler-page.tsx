@@ -105,7 +105,7 @@ export default function SchedulerPage() {
 
   return (
     <div className="min-h-screen w-full bg-background p-4 md:p-8 flex flex-col">
-      <main className="flex-grow grid grid-cols-1 lg:gap-8 transition-all duration-500 ease-in-out">
+      <main className="flex-grow grid grid-cols-1 lg:grid-cols-2 lg:gap-8 transition-all duration-500 ease-in-out">
         <div className={`transition-all duration-500 ${view === 'schedule' ? 'lg:hidden' : 'lg:block'}`}>
           <AppointmentForm
             onSuggest={handleSuggest}
