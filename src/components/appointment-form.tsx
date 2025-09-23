@@ -185,7 +185,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                                     className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
                                   >
                                     <Clock className="w-4 h-4" />
-                                    <span className="truncate">Journée</span>
+                                    <span>Journée</span>
                                   </Button>
                                 )}
                                 <Button
@@ -195,7 +195,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                                   className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
                                 >
                                   <Sunrise className="w-4 h-4" />
-                                  <span className="truncate">Matin</span>
+                                  <span>Matin</span>
                                 </Button>
                                 {day.name !== 'samedi' && (
                                   <Button
@@ -205,7 +205,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                                     className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
                                   >
                                     <Sunset className="w-4 h-4" />
-                                    <span className="truncate">A-midi</span>
+                                    <span>A-midi</span>
                                   </Button>
                                 )}
                              </motion.div>
