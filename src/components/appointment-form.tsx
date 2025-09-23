@@ -158,7 +158,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                           <div className="grid grid-cols-1 gap-2">
                              <Button
                                 type="button"
-                                variant={selectedPreferences.includes(`${day.name} toute la journée`) ? 'primary' : 'outline'}
+                                variant={selectedPreferences.includes(`${day.name} toute la journée`) ? 'default' : 'outline'}
                                 onClick={() => handlePreferenceToggle(day.name, 'toute la journée')}
                                 className="h-12 text-base flex items-center justify-center gap-2"
                               >
@@ -167,7 +167,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                               </Button>
                             <Button
                               type="button"
-                              variant={selectedPreferences.includes(`${day.name} matin`) ? 'primary' : 'outline'}
+                              variant={selectedPreferences.includes(`${day.name} matin`) ? 'default' : 'outline'}
                               onClick={() => handlePreferenceToggle(day.name, 'matin')}
                               className="h-12 text-base flex items-center justify-center gap-2"
                             >
@@ -177,7 +177,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                             {day.name !== 'samedi' && (
                               <Button
                                 type="button"
-                                variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'primary' : 'outline'}
+                                variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'default' : 'outline'}
                                 onClick={() => handlePreferenceToggle(day.name, 'après-midi')}
                                 className="h-12 text-base flex items-center justify-center gap-2"
                               >

@@ -6,12 +6,13 @@ import { fr } from "date-fns/locale";
 import type { Appointment } from "@/types/appointment";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, ArrowLeft, Plus, Printer, Trash2, Edit, Save, User, CheckCircle } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, Plus, Printer, Trash2, Edit, Save, User, CheckCircle, AlertTriangle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { AnimatePresence, motion } from "framer-motion";
 import { Separator } from "./ui/separator";
+import { Badge } from "./ui/badge";
 
 interface AppointmentScheduleProps {
   initialPatientName: string;
@@ -20,6 +21,8 @@ interface AppointmentScheduleProps {
   onBack: () => void;
   onPatientNameChange: (name: string) => void;
 }
+
+const SHIFT_REGEX = /décalé de (\d+) jour(s?)/;
 
 export default function AppointmentSchedule({ initialPatientName, startDate, initialAppointments, onBack, onPatientNameChange }: AppointmentScheduleProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
@@ -35,7 +38,7 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
   const updateAppointmentDate = (id: string, date: Date | undefined) => {
     if (!date) return;
     setAppointments(
-      appointments.map((apt) => (apt.id === id ? { ...apt, date } : apt))
+      appointments.map((apt) => (apt.id === id ? { ...apt, date, description: apt.description.replace(SHIFT_REGEX, '').replace(/\(base J\+\d+, \)/, '') } : apt))
     );
   };
   
@@ -68,6 +71,14 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
     setIsNameValidated(true);
     onPatientNameChange(patientName);
   };
+
+  const getShiftAmount = (description: string): number | null => {
+    const match = description.match(SHIFT_REGEX);
+    if (match && match[1]) {
+      return parseInt(match[1], 10);
+    }
+    return null;
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
@@ -121,7 +132,9 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
 
           <ul className="space-y-4">
             <AnimatePresence>
-            {appointments.map((apt) => (
+            {appointments.map((apt) => {
+              const shiftAmount = getShiftAmount(apt.description);
+              return (
               <motion.li
                 key={apt.id}
                 layout
@@ -152,16 +165,22 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-grow">
                       <div className="flex-shrink-0 bg-primary/20 text-primary rounded-full h-10 w-10 flex items-center justify-center">
                         <CalendarIcon className="h-5 w-5" />
                       </div>
-                      <div>
+                      <div className="flex-grow">
                         <p className="font-semibold text-foreground print-text-black capitalize">
                           {format(apt.date, "EEEE d MMMM yyyy", { locale: fr })}
                         </p>
                         <p className="text-sm text-muted-foreground print-text-black">{apt.description}</p>
                       </div>
+                       {shiftAmount !== null && shiftAmount > 0 && (
+                        <Badge variant="secondary" className="flex items-center gap-1.5 no-print">
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                          +{shiftAmount} jour{shiftAmount > 1 ? 's' : ''}
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex gap-1 no-print">
                        <Button variant="ghost" size="icon" onClick={() => setEditingId(apt.id)}><Edit className="w-4 h-4"/></Button>
@@ -170,7 +189,7 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                   </>
                 )}
               </motion.li>
-            ))}
+            )})}
             </AnimatePresence>
           </ul>
         </CardContent>
