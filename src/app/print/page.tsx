@@ -114,7 +114,7 @@ export default function PrintPage() {
             
             <div className="bg-primary/5 border border-primary/10 rounded-xl p-6">
                 <h3 className="font-headline text-2xl text-primary mb-2 flex items-center gap-2"><BrainCircuit className="w-6 h-6"/>Suivi J+7, J+14, J+21 et J+30 — pour une adaptation réussie</h3>
-                <p className="text-muted-foreground mb-6"><strong>Un départ progressif pour une réussite commune :</strong> Nous débutons volontairement avec un réglage en <i>sous-correction</i> pour permettre à votre cerveau de se réhabituer progressivement, sans fatigue. Le véritable succès vient de notre collaboration : vos retours et nos réglages précis nous permettront d'atteindre ensemble votre cible auditive optimale.</p>
+                <p className="text-muted-foreground mb-6"><strong>Un départ progressif pour une réussite commune :</strong> Nous débutons volontairement avec un réglage en <i>sous-correction</i> pour une phase d'accoutumance en douceur. Le véritable succès vient de notre collaboration : vos retours et nos réglages précis nous permettront d'atteindre ensemble votre cible auditive optimale.</p>
 
                 <ul className="space-y-4 mb-6">
                     <li className="flex items-start gap-3">
@@ -136,7 +136,7 @@ export default function PrintPage() {
                 </ul>
 
                 <h4 className="font-headline text-xl text-primary mb-2 flex items-center gap-2"><Info className="w-5 h-5"/>Pourquoi c’est important</h4>
-                <p className="text-muted-foreground mb-4">Votre présence à ces 4 rendez‑vous représente une grande part de la réussite (souvent 50–60%). Plus on avance ensemble, plus vite on atteint un confort durable et une meilleure compréhension.</p>
+                <p className="text-muted-foreground mb-4">Votre présence à ces 4 rendez‑vous représente une grande part de la réussite (souvent 50–60%). Plus vous avancerez, plus vite vous atteindrez un confort durable et une meilleure compréhension, c'est la voie du succès.</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div className="bg-background/50 p-4 rounded-lg">
                         <p className="font-semibold text-foreground">Porter vos aides chaque jour</p>
