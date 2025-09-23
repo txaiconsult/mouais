@@ -9,7 +9,7 @@ import type { Appointment } from "@/types/appointment";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar as CalendarIcon, Info, BrainCircuit } from "lucide-react";
-import { motion } from "framer-motion";
+import './print.css';
 
 const PRINT_STORAGE_KEY = 'active-audition-agenda-print-data';
 
@@ -34,7 +34,6 @@ export default function PrintPage() {
       const savedData = localStorage.getItem(PRINT_STORAGE_KEY);
       if (savedData) {
         const parsed = JSON.parse(savedData);
-        // Dates need to be reconstructed
         parsed.appointments = parsed.appointments.map((apt: any) => ({
           ...apt,
           date: new Date(apt.date),
@@ -42,7 +41,6 @@ export default function PrintPage() {
         parsed.startDate = new Date(parsed.startDate);
         setData(parsed);
       } else {
-        // If there's no data, redirect to home
         router.push('/');
       }
     } catch (error) {
@@ -68,17 +66,11 @@ export default function PrintPage() {
   const { patientName, startDate, appointments } = data;
 
   return (
-    <div className="print-container w-full bg-background p-4 md:p-8 flex items-center justify-center">
-      <motion.div 
-        className="w-full max-w-4xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="print-content w-full shadow-2xl">
+    <div className="print-container bg-background">
+        <div className="print-content">
           <CardHeader className="text-center relative pt-8">
-            <div className="absolute top-4 right-4">
-              <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="no-print">
+            <div className="absolute top-4 right-4 no-print">
+              <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
                 <ArrowLeft />
                 <span className="sr-only">Retour</span>
               </Button>
@@ -163,8 +155,7 @@ export default function PrintPage() {
             </div>
 
           </CardContent>
-        </Card>
-      </motion.div>
+        </div>
     </div>
   );
 }

@@ -80,42 +80,7 @@
 }
 
 @media print {
-  body {
-    background-color: white !important;
-    color: black !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
   .no-print, .no-print * {
     display: none !important;
   }
-  
-  .print-only {
-    display: block !important;
-  }
-
-  .print-container {
-    display: block !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    min-height: unset !important;
-    height: auto !important;
-  }
-
-  .print-content {
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  @page {
-    size: A4;
-    margin: 1.5cm;
-  }
-}
-
-.print-only {
-  display: none;
 }
