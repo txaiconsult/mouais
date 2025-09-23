@@ -145,7 +145,7 @@ export default function PrintPage() {
                 </ul>
 
                 <h4 className="font-headline text-xl text-primary mb-2 flex items-center gap-2"><Info className="w-5 h-5"/>Pourquoi c’est important</h4>
-                <p className="text-muted-foreground mb-4">Pour atteindre rapidement un confort d'écoute optimal et une meilleure compréhension au quotidien, votre participation active à ces rendez-vous est la clé du succès.</p>
+                <p className="text-muted-foreground mb-4">Pour tirer tous les bénéfices de vos aides auditives et atteindre un confort d'écoute optimal, votre participation active à ces rendez-vous est la clé du succès.</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div className="bg-background/50 p-4 rounded-lg">
                         <p className="font-semibold text-foreground">Porter vos aides chaque jour</p>
@@ -171,5 +171,7 @@ export default function PrintPage() {
     </div>
   );
 }
+
+    
 
     
