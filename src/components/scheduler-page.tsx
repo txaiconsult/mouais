@@ -104,27 +104,15 @@ export default function SchedulerPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-background p-4 md:p-8 flex flex-col">
-      <main className="flex-grow grid grid-cols-1 lg:grid-cols-2 lg:gap-8 transition-all duration-500 ease-in-out">
-        <div className={`transition-all duration-500 ${view === 'schedule' ? 'lg:hidden' : 'lg:block'}`}>
-          <AppointmentForm
-            onSuggest={handleSuggest}
-            isLoading={isLoading}
-            initialData={initialFormData}
-          />
-        </div>
-        
-        <div className={`transition-all duration-500 ${view === 'schedule' ? 'lg:col-span-2' : ''}`}>
-          {view === "form" && (
-            <Card className="hidden lg:flex h-full min-h-[500px] w-full items-center justify-center border-2 border-dashed bg-card/50">
-              <CardContent className="text-center text-muted-foreground p-6">
-                <Calendar className="mx-auto h-12 w-12 mb-4" />
-                <h2 className="text-xl font-semibold font-headline">En attente d'informations</h2>
-                <p>Veuillez remplir le formulaire pour générer le calendrier des rendez-vous.</p>
-              </CardContent>
-            </Card>
-          )}
-          {view === "schedule" && startDate && (
+    <div className="min-h-screen w-full bg-background p-4 md:p-8 flex flex-col items-center">
+      <main className="w-full max-w-5xl flex-grow transition-all duration-500 ease-in-out">
+        {view === 'form' ? (
+            <AppointmentForm
+              onSuggest={handleSuggest}
+              isLoading={isLoading}
+              initialData={initialFormData}
+            />
+        ) : startDate && (
             <AppointmentSchedule
               initialPatientName={patientName}
               startDate={startDate}
@@ -132,8 +120,7 @@ export default function SchedulerPage() {
               onBack={handleBack}
               onPatientNameChange={handlePatientNameChange}
             />
-          )}
-        </div>
+        )}
       </main>
       <footer className="mt-12 flex flex-col items-center justify-center gap-2">
         <Logo className="w-[150px] h-auto opacity-60" />
