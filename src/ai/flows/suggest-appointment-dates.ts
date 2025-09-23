@@ -118,10 +118,8 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
     };
 
     let currentStartDate = j0;
-    let totalDaysFromJ0 = 0;
-
+    
     for (let i = 0; i < intervals.length; i++) {
-      totalDaysFromJ0 += intervals[i];
       const initialTargetDate = addDays(currentStartDate, intervals[i]);
       let targetDate = new Date(initialTargetDate);
       
@@ -129,25 +127,23 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
         targetDate = addDays(targetDate, 1);
       }
       
-      const absoluteBaseDate = addDays(j0, totalDaysFromJ0);
-      const dayDifference = differenceInDays(targetDate, absoluteBaseDate);
-
-      let intervalLabel: string;
-      if (dayDifference !== 0) {
-          const sign = dayDifference > 0 ? '+' : '';
-          const plural = Math.abs(dayDifference) > 1 ? 's' : '';
-          intervalLabel = `(~J+${totalDaysFromJ0}, décalé de ${sign}${dayDifference} jour${plural})`;
-      } else {
-          intervalLabel = `(J+${totalDaysFromJ0})`;
-      }
+      const totalDaysFromJ0 = differenceInDays(targetDate, j0);
+      const daysFromPrevious = differenceInDays(targetDate, currentStartDate);
+      const originalDaysFromPrevious = intervals[i];
+      const shift = daysFromPrevious - originalDaysFromPrevious;
+      
+      let intervalLabel = `(J+${totalDaysFromJ0} au total)`;
 
       if (i > 0) {
-        const daysFromPrevious = differenceInDays(targetDate, new Date(appointmentDates[i-1].date));
-        intervalLabel = `(+${daysFromPrevious}j) ` + intervalLabel;
+        intervalLabel = `(+${daysFromPrevious} jours) ${intervalLabel}`;
       }
 
-
       let description = `${baseDescriptions[i]} ${intervalLabel}`;
+
+      if (shift > 0) {
+          const plural = shift > 1 ? 's' : '';
+          description += ` (décalé de ${shift} jour${plural})`;
+      }
       
       if (preferredSlots && preferredSlots.length > 0) {
         const day = getDay(targetDate);

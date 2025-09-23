@@ -38,7 +38,7 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
   const updateAppointmentDate = (id: string, date: Date | undefined) => {
     if (!date) return;
     setAppointments(
-      appointments.map((apt) => (apt.id === id ? { ...apt, date, description: apt.description.replace(SHIFT_REGEX, '').replace(/\(base J\+\d+, \)/, '') } : apt))
+      appointments.map((apt) => (apt.id === id ? { ...apt, date, description: apt.description.replace(SHIFT_REGEX, '').replace(/\(décalé de \d+ jour(s?)\)/, '') } : apt))
     );
   };
   
@@ -78,6 +78,10 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
       return parseInt(match[1], 10);
     }
     return null;
+  }
+
+  const cleanDescriptionForDisplay = (description: string): string => {
+    return description.replace(SHIFT_REGEX, '').trim();
   }
 
   return (
@@ -134,6 +138,7 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
             <AnimatePresence>
             {appointments.map((apt) => {
               const shiftAmount = getShiftAmount(apt.description);
+              const displayDescription = cleanDescriptionForDisplay(apt.description);
               return (
               <motion.li
                 key={apt.id}
@@ -173,12 +178,12 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                         <p className="font-semibold text-foreground print-text-black capitalize">
                           {format(apt.date, "EEEE d MMMM yyyy", { locale: fr })}
                         </p>
-                        <p className="text-sm text-muted-foreground print-text-black">{apt.description}</p>
+                        <p className="text-sm text-muted-foreground print-text-black">{displayDescription}</p>
                       </div>
                        {shiftAmount !== null && shiftAmount > 0 && (
                         <Badge variant="secondary" className="flex items-center gap-1.5 no-print">
                           <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
-                          +{shiftAmount} jour{shiftAmount > 1 ? 's' : ''}
+                          Décalé de {shiftAmount} jour{shiftAmount > 1 ? 's' : ''}
                         </Badge>
                       )}
                     </div>
