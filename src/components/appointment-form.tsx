@@ -92,22 +92,6 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="patientName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom du patient</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input placeholder="Ex: Jean Dupont" {...field} className="pl-10" />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="startDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
@@ -181,6 +165,22 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="patientName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom et prénom du patient</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="Ex: Jean Dupont" {...field} className="pl-10" />
                     </div>
                   </FormControl>
                   <FormMessage />
