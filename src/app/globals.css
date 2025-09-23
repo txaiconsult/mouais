@@ -80,23 +80,26 @@
 }
 
 @media print {
-  .no-print {
-    display: none !important;
-  }
   body {
     background-color: white !important;
     color: black !important;
+    margin: 1rem;
   }
-  .print-container {
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
+
+  .no-print {
+    display: none !important;
   }
-  .print-bg-white {
-    background-color: white !important;
+
+  .print-only {
+    display: block !important;
   }
-  .print-text-black {
-    color: black !important;
+
+  @page {
+    size: A4;
+    margin: 2cm;
   }
+}
+
+.print-only {
+  display: none;
 }
