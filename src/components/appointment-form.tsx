@@ -25,7 +25,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { formSchema } from "@/lib/schema";
 import type { z } from "zod";
 import { useEffect, useState } from "react";
-import { Badge } from "./ui/badge";
+import { AnimatePresence, motion } from "framer-motion";
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -54,6 +54,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   });
   
   const [selectedPreferences, setSelectedPreferences] = useState<Record<string, TimePreference>>({});
+  const [activeDay, setActiveDay] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData?.patientPreferences) {
@@ -77,10 +78,13 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   const handlePreferenceChange = (day: string, time: TimePreference | null) => {
     const newSelectedPrefs = { ...selectedPreferences };
 
-    if (time === null || newSelectedPrefs[day] === time) {
+    if (time === null || (newSelectedPrefs[day] === time && activeDay === day)) {
+       // If clicking the same preference again, deselect it
       delete newSelectedPrefs[day];
+      setActiveDay(null);
     } else {
       newSelectedPrefs[day] = time;
+      setActiveDay(day); // Keep it active to show selection
     }
     
     setSelectedPreferences(newSelectedPrefs);
@@ -156,41 +160,57 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                   <FormControl>
                     <div className="grid grid-cols-2 md:grid-cols-2 gap-4 pt-2">
                       {daysOfWeek.map(day => (
-                        <div key={day.name} className="flex flex-col items-center justify-center p-3 rounded-lg border bg-card/80 gap-3">
+                        <div 
+                          key={day.name} 
+                          className="flex flex-col items-center justify-center p-3 rounded-lg border bg-card/80 gap-3 cursor-pointer"
+                          onClick={() => setActiveDay(activeDay === day.name ? null : day.name)}
+                        >
                            <span className="text-xl font-semibold capitalize">{day.label}</span>
-                           <div className="flex w-full gap-1">
-                              {day.name !== 'samedi' && (
-                                <Button
-                                  type="button"
-                                  variant={selectedPreferences[day.name] === 'toute la journée' ? 'default' : 'outline'}
-                                  onClick={() => handlePreferenceChange(day.name, 'toute la journée')}
-                                  className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
-                                >
-                                  <Clock className="w-4 h-4" />
-                                  <span className="truncate">Journée</span>
-                                </Button>
-                              )}
-                              <Button
-                                type="button"
-                                variant={selectedPreferences[day.name] === 'matin' ? 'default' : 'outline'}
-                                onClick={() => handlePreferenceChange(day.name, 'matin')}
-                                className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
+                           <AnimatePresence>
+                           {activeDay === day.name && (
+                             <motion.div 
+                                className="flex w-full gap-1"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                // Stop propagation to prevent card click from closing the options
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                <Sunrise className="w-4 h-4" />
-                                <span className="truncate">Matin</span>
-                              </Button>
-                              {day.name !== 'samedi' && (
+                                {day.name !== 'samedi' && (
+                                  <Button
+                                    type="button"
+                                    variant={selectedPreferences[day.name] === 'toute la journée' ? 'default' : 'outline'}
+                                    onClick={() => handlePreferenceChange(day.name, 'toute la journée')}
+                                    className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
+                                  >
+                                    <Clock className="w-4 h-4" />
+                                    <span className="truncate">Journée</span>
+                                  </Button>
+                                )}
                                 <Button
                                   type="button"
-                                  variant={selectedPreferences[day.name] === 'après-midi' ? 'default' : 'outline'}
-                                  onClick={() => handlePreferenceChange(day.name, 'après-midi')}
+                                  variant={selectedPreferences[day.name] === 'matin' ? 'default' : 'outline'}
+                                  onClick={() => handlePreferenceChange(day.name, 'matin')}
                                   className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
                                 >
-                                  <Sunset className="w-4 h-4" />
-                                  <span className="truncate">A-midi</span>
+                                  <Sunrise className="w-4 h-4" />
+                                  <span className="truncate">Matin</span>
                                 </Button>
-                              )}
-                           </div>
+                                {day.name !== 'samedi' && (
+                                  <Button
+                                    type="button"
+                                    variant={selectedPreferences[day.name] === 'après-midi' ? 'default' : 'outline'}
+                                    onClick={() => handlePreferenceChange(day.name, 'après-midi')}
+                                    className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
+                                  >
+                                    <Sunset className="w-4 h-4" />
+                                    <span className="truncate">A-midi</span>
+                                  </Button>
+                                )}
+                             </motion.div>
+                           )}
+                           </AnimatePresence>
                         </div>
                       ))}
                     </div>
