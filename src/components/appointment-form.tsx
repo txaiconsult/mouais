@@ -37,7 +37,6 @@ interface AppointmentFormProps {
 
 const daysOfWeek = [
   { name: 'mardi', label: 'Mardi' },
-  { name: 'mercredi', label: 'Mercredi' },
   { name: 'jeudi', label: 'Jeudi' },
   { name: 'vendredi', label: 'Vendredi' },
   { name: 'samedi', label: 'Samedi' },
@@ -154,27 +153,27 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                 <FormItem>
                   <FormLabel>Jours de rendez-vous préférés (optionnel)</FormLabel>
                   <FormControl>
-                    <div className="space-y-4 pt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                       {daysOfWeek.map(day => (
                         <div key={day.name} className="flex flex-col gap-2 p-3 rounded-lg border bg-card/50">
-                          <p className="font-medium text-center capitalize">{day.label}</p>
-                          <div className="grid grid-cols-2 gap-2">
+                          <p className="font-medium text-lg text-center capitalize">{day.label}</p>
+                          <div className="grid grid-cols-1 gap-2">
                             <Button
                               type="button"
                               variant={selectedPreferences.includes(`${day.name} matin`) ? 'primary' : 'outline'}
                               onClick={() => handlePreferenceToggle(`${day.name} matin`)}
-                              className="flex items-center gap-2"
+                              className="h-12 text-base flex items-center justify-center gap-2"
                             >
-                              <Sunrise className="w-4 h-4" />
+                              <Sunrise className="w-5 h-5" />
                               <span>Matin</span>
                             </Button>
                             <Button
                               type="button"
                               variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'primary' : 'outline'}
                               onClick={() => handlePreferenceToggle(`${day.name} après-midi`)}
-                              className="flex items-center gap-2"
+                              className="h-12 text-base flex items-center justify-center gap-2"
                             >
-                              <Sunset className="w-4 h-4" />
+                              <Sunset className="w-5 h-5" />
                               <span>Après-midi</span>
                             </Button>
                           </div>
@@ -186,10 +185,10 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full h-12 text-lg" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Génération en cours...
                 </>
               ) : (
