@@ -96,7 +96,18 @@
   }
 
   .print-container {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
     min-height: unset !important;
+    height: auto !important;
+  }
+
+  .print-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 
   @page {
