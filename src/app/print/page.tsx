@@ -113,7 +113,7 @@ export default function PrintPage() {
               </ul>
             </div>
             
-            <div className="bg-primary/5 border border-primary/10 rounded-xl p-6">
+            <div className="bg-primary/5 border border-primary/10 rounded-xl p-6 info-card">
                 <h3 className="font-headline text-2xl text-primary mb-2 flex items-center gap-2"><BrainCircuit className="w-6 h-6"/>Suivi J+7, J+14, J+21 et J+30 — pour une adaptation réussie</h3>
                 <p className="text-muted-foreground mb-6"><strong>Un départ progressif pour une réussite commune :</strong> Nous débutons volontairement avec un réglage en <i>sous-correction</i> pour une phase d'accoutumance en douceur. Le véritable succès vient de notre collaboration : vos retours et nos réglages précis nous permettront d'atteindre ensemble votre cible auditive optimale.</p>
 
