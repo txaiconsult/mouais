@@ -11,12 +11,14 @@ import { formSchema } from "@/lib/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { Logo } from "./logo";
+import Loading from "@/app/loading";
 
 type FormData = z.infer<typeof formSchema>;
 
 const LOCAL_STORAGE_KEY = 'active-audition-agenda-form';
 
 export default function SchedulerPage() {
+  const [isInitializing, setIsInitializing] = useState(true);
   const [view, setView] = useState<"form" | "schedule">("form");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patientName, setPatientName] = useState("");
@@ -25,6 +27,15 @@ export default function SchedulerPage() {
   const { toast } = useToast();
 
   const [initialFormData, setInitialFormData] = useState<Partial<FormData>>({});
+
+  useEffect(() => {
+    // Simulate loading for 2 seconds
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     try {
@@ -102,6 +113,10 @@ export default function SchedulerPage() {
     }
     setView("form");
   };
+
+  if (isInitializing) {
+    return <Loading />;
+  }
 
   return (
     <div className="min-h-screen w-full bg-background p-4 md:p-8 flex flex-col items-center">
