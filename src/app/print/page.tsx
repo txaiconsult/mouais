@@ -65,6 +65,13 @@ export default function PrintPage() {
   }
 
   const { patientName, startDate, appointments } = data;
+  
+  const gradientStyle: React.CSSProperties = {
+    background: 'linear-gradient(45deg, #2196F3, #FF4081)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    display: 'inline-block'
+  };
 
   return (
     <div className="print-container bg-background">
@@ -80,7 +87,7 @@ export default function PrintPage() {
           </header>
           <CardHeader className="text-center relative pt-0">
             <CardTitle className="font-headline text-3xl md:text-4xl">
-              Vos actives dates clefs, <span className="text-primary">{patientName}</span>
+              Vos <span style={gradientStyle}>actives</span> dates clefs, <span className="text-primary">{patientName}</span>
             </CardTitle>
             <CardDescription className="text-lg md:text-xl">
               Départ des appareils le {format(new Date(startDate), "d MMMM yyyy", { locale: fr })}
