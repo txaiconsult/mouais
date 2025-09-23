@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -43,6 +43,12 @@ const daysOfWeek = [
   { name: 'vendredi', label: 'Vendredi' },
   { name: 'samedi', label: 'Samedi' },
 ];
+
+const preferenceLabels: Record<TimePreference, string> = {
+  'matin': 'Matin',
+  'après-midi': 'Après-midi',
+  'toute la journée': 'Journée'
+};
 
 export default function AppointmentForm({ onSuggest, isLoading, initialData }: AppointmentFormProps) {
   const form = useForm<FormData>({
@@ -229,6 +235,30 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                 </FormItem>
               )}
             />
+
+            <AnimatePresence>
+              {Object.keys(selectedPreferences).length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="p-4 rounded-lg border bg-muted/50 text-sm"
+                >
+                  <h4 className="font-semibold mb-2 flex items-center gap-2 text-foreground">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    Récapitulatif des préférences :
+                  </h4>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
+                    {Object.entries(selectedPreferences).map(([day, time]) => (
+                       <li key={day} className="capitalize">
+                        {daysOfWeek.find(d => d.name === day)?.label}: {preferenceLabels[time]}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <Button type="submit" className="w-full h-16 text-2xl font-bold" disabled={isLoading}>
               {isLoading ? (
                 <>
