@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, ChevronDown } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -77,7 +77,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   const handlePreferenceChange = (day: string, time: TimePreference | null) => {
     const newSelectedPrefs = { ...selectedPreferences };
 
-    if (time === null) {
+    if (time === null || newSelectedPrefs[day] === time) {
       delete newSelectedPrefs[day];
     } else {
       newSelectedPrefs[day] = time;
@@ -92,13 +92,6 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
     form.setValue('patientPreferences', preferencesString ? `only on ${preferencesString}` : '', { shouldValidate: true });
   };
   
-  const getBadgeLabel = (time: TimePreference | undefined) => {
-    if (!time) return null;
-    if (time === 'toute la journée') return 'Journée';
-    if (time === 'après-midi') return 'A-Midi';
-    return time.charAt(0).toUpperCase() + time.slice(1);
-  }
-
   function onSubmit(data: FormData) {
     onSuggest(data);
   }
@@ -163,62 +156,42 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                   <FormControl>
                     <div className="grid grid-cols-2 md:grid-cols-2 gap-4 pt-2">
                       {daysOfWeek.map(day => (
-                        <Popover key={day.name}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant={selectedPreferences[day.name] ? 'default' : 'outline'}
-                              className="h-24 text-2xl flex flex-col items-center justify-center gap-2"
-                            >
-                              <span className="capitalize">{day.label}</span>
-                              {selectedPreferences[day.name] && <Badge variant="secondary">{getBadgeLabel(selectedPreferences[day.name])}</Badge>}
-                              <ChevronDown className="w-5 h-5 absolute bottom-2 right-2 text-muted-foreground" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-60 p-2">
-                            <div className="flex flex-col gap-2">
+                        <div key={day.name} className="flex flex-col items-center justify-center p-3 rounded-lg border bg-card/80 gap-3">
+                           <span className="text-xl font-semibold capitalize">{day.label}</span>
+                           <div className="flex w-full gap-1">
                               {day.name !== 'samedi' && (
                                 <Button
                                   type="button"
-                                  variant={selectedPreferences[day.name] === 'toute la journée' ? 'default' : 'ghost'}
+                                  variant={selectedPreferences[day.name] === 'toute la journée' ? 'default' : 'outline'}
                                   onClick={() => handlePreferenceChange(day.name, 'toute la journée')}
-                                  className="h-12 text-base flex items-center justify-start gap-3"
+                                  className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
                                 >
-                                  <Clock className="w-5 h-5" />
-                                  <span>Toute la journée</span>
+                                  <Clock className="w-4 h-4" />
+                                  <span className="truncate">Journée</span>
                                 </Button>
                               )}
                               <Button
                                 type="button"
-                                variant={selectedPreferences[day.name] === 'matin' ? 'default' : 'ghost'}
+                                variant={selectedPreferences[day.name] === 'matin' ? 'default' : 'outline'}
                                 onClick={() => handlePreferenceChange(day.name, 'matin')}
-                                className="h-12 text-base flex items-center justify-start gap-3"
+                                className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
                               >
-                                <Sunrise className="w-5 h-5" />
-                                <span>Matin</span>
+                                <Sunrise className="w-4 h-4" />
+                                <span className="truncate">Matin</span>
                               </Button>
                               {day.name !== 'samedi' && (
                                 <Button
                                   type="button"
-                                  variant={selectedPreferences[day.name] === 'après-midi' ? 'default' : 'ghost'}
+                                  variant={selectedPreferences[day.name] === 'après-midi' ? 'default' : 'outline'}
                                   onClick={() => handlePreferenceChange(day.name, 'après-midi')}
-                                  className="h-12 text-base flex items-center justify-start gap-3"
+                                  className="h-12 text-xs flex-1 flex flex-col gap-1 items-center justify-center px-1"
                                 >
-                                  <Sunset className="w-5 h-5" />
-                                  <span>Après-midi</span>
+                                  <Sunset className="w-4 h-4" />
+                                  <span className="truncate">A-midi</span>
                                 </Button>
                               )}
-                               <Button
-                                  type="button"
-                                  variant="destructive"
-                                  onClick={() => handlePreferenceChange(day.name, null)}
-                                  className="h-10 text-base mt-2"
-                                >
-                                  Effacer
-                                </Button>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
+                           </div>
+                        </div>
                       ))}
                     </div>
                   </FormControl>
