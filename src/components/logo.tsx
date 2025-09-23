@@ -27,8 +27,9 @@ export function Logo({ className, ...props }: LogoProps) {
         </linearGradient>
       </defs>
       <text
-        x="0"
+        x="50%"
         y="85"
+        textAnchor="middle"
         fill="url(#aaGradient)"
         fontFamily="Roboto, Arial, sans-serif"
         fontWeight="700"
