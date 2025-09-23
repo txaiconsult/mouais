@@ -76,7 +76,7 @@ export default function PrintPage() {
   return (
     <div className="print-container bg-background">
         <div className="print-content">
-          <CardHeader className="text-center relative pt-8 md:pt-16">
+          <CardHeader className="text-center relative pt-8 md:pt-16 print:mb-8">
             <div className="absolute top-4 right-4 no-print">
               <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
                 <ArrowLeft />
@@ -91,7 +91,7 @@ export default function PrintPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 md:p-10">
-            <div className="relative pl-8 mb-12">
+            <div className="relative pl-8 print:mt-8">
               <div className="absolute left-4 top-0 bottom-0 w-0.5 timeline-line -z-10"></div>
               <ul className="space-y-10">
                 {appointments.map((apt, index) => {
@@ -179,5 +179,6 @@ export default function PrintPage() {
     
 
     
+
 
 
