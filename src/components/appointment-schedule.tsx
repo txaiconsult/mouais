@@ -84,6 +84,8 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
     return description.replace(SHIFT_REGEX, '').trim();
   }
 
+  const appointmentDates = appointments.map(apt => apt.date);
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
       <Card className="w-full print-container">
@@ -108,95 +110,105 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
             </div>
           </div>
         </CardHeader>
-        <CardContent className="print-bg-white">
-          {!isNameValidated && (
-            <div className="p-4 mb-6 rounded-lg bg-accent/20 border border-accent/50 no-print">
-              <p className="font-semibold mb-2 text-foreground">Finalisez la planification</p>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                <div className="relative flex-grow w-full">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Nom et prénom du patient" 
-                    value={patientName}
-                    onChange={(e) => {
-                      setPatientName(e.target.value);
-                      if (nameInputError) setNameInputError('');
-                    }}
-                    className="pl-10 w-full"
-                  />
-                </div>
-                <Button onClick={handleValidateName} className="w-full sm:w-auto">
-                  <CheckCircle className="mr-2 h-4 w-4"/>
-                  Valider
-                </Button>
-              </div>
-              {nameInputError && <p className="text-sm font-medium text-destructive mt-2">{nameInputError}</p>}
-            </div>
-          )}
-
-          <ul className="space-y-4">
-            <AnimatePresence>
-            {appointments.map((apt) => {
-              const shiftAmount = getShiftAmount(apt.description);
-              const displayDescription = cleanDescriptionForDisplay(apt.description);
-              return (
-              <motion.li
-                key={apt.id}
-                layout
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.3 }}
-                className="p-4 rounded-lg border bg-card flex items-center justify-between gap-4"
-              >
-                {editingId === apt.id ? (
-                  <>
-                    <Popover onOpenChange={(open) => !open && setEditingId(null)}>
-                        <PopoverTrigger asChild>
-                           <Button variant="outline" className="flex-grow justify-start">
-                             {format(apt.date, "EEEE d MMMM yyyy", { locale: fr })}
-                           </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                           <Calendar mode="single" selected={apt.date} onSelect={(d) => updateAppointmentDate(apt.id, d)} initialFocus locale={fr}/>
-                        </PopoverContent>
-                     </Popover>
-                     <Input
-                        value={apt.description}
-                        onChange={(e) => updateAppointmentDescription(apt.id, e.target.value)}
-                        className="flex-grow"
-                      />
-                     <Button size="icon" variant="ghost" onClick={() => setEditingId(null)}><Save className="h-4 w-4"/></Button>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-4 flex-grow">
-                      <div className="flex-shrink-0 bg-primary/20 text-primary rounded-full h-10 w-10 flex items-center justify-center">
-                        <CalendarIcon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-grow">
-                        <p className="font-semibold text-foreground print-text-black capitalize">
-                          {format(apt.date, "EEEE d MMMM yyyy", { locale: fr })}
-                        </p>
-                        <p className="text-sm text-muted-foreground print-text-black">{displayDescription}</p>
-                      </div>
-                       {shiftAmount !== null && shiftAmount > 0 && (
-                        <Badge variant="secondary" className="flex items-center gap-1.5 no-print">
-                          <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
-                          Décalé de {shiftAmount} jour{shiftAmount > 1 ? 's' : ''}
-                        </Badge>
-                      )}
+        <CardContent className="grid md:grid-cols-2 gap-8 print-bg-white">
+            <div className="flex flex-col gap-6">
+                {!isNameValidated && (
+                    <div className="p-4 rounded-lg bg-accent/20 border border-accent/50 no-print">
+                    <p className="font-semibold mb-2 text-foreground">Finalisez la planification</p>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <div className="relative flex-grow w-full">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Nom et prénom du patient" 
+                            value={patientName}
+                            onChange={(e) => {
+                            setPatientName(e.target.value);
+                            if (nameInputError) setNameInputError('');
+                            }}
+                            className="pl-10 w-full"
+                        />
+                        </div>
+                        <Button onClick={handleValidateName} className="w-full sm:w-auto">
+                        <CheckCircle className="mr-2 h-4 w-4"/>
+                        Valider
+                        </Button>
                     </div>
-                    <div className="flex gap-1 no-print">
-                       <Button variant="ghost" size="icon" onClick={() => setEditingId(apt.id)}><Edit className="w-4 h-4"/></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteAppointment(apt.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4"/></Button>
+                    {nameInputError && <p className="text-sm font-medium text-destructive mt-2">{nameInputError}</p>}
                     </div>
-                  </>
                 )}
-              </motion.li>
-            )})}
-            </AnimatePresence>
-          </ul>
+                <ul className="space-y-4">
+                    <AnimatePresence>
+                    {appointments.map((apt) => {
+                    const shiftAmount = getShiftAmount(apt.description);
+                    const displayDescription = cleanDescriptionForDisplay(apt.description);
+                    return (
+                    <motion.li
+                        key={apt.id}
+                        layout
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -100 }}
+                        transition={{ duration: 0.3 }}
+                        className="p-4 rounded-lg border bg-card flex items-center justify-between gap-4"
+                    >
+                        {editingId === apt.id ? (
+                        <>
+                            <Popover onOpenChange={(open) => !open && setEditingId(null)}>
+                                <PopoverTrigger asChild>
+                                <Button variant="outline" className="flex-grow justify-start">
+                                    {format(apt.date, "EEEE d MMMM yyyy", { locale: fr })}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                <Calendar mode="single" selected={apt.date} onSelect={(d) => updateAppointmentDate(apt.id, d)} initialFocus locale={fr}/>
+                                </PopoverContent>
+                            </Popover>
+                            <Input
+                                value={apt.description}
+                                onChange={(e) => updateAppointmentDescription(apt.id, e.target.value)}
+                                className="flex-grow"
+                            />
+                            <Button size="icon" variant="ghost" onClick={() => setEditingId(null)}><Save className="h-4 w-4"/></Button>
+                        </>
+                        ) : (
+                        <>
+                            <div className="flex items-center gap-4 flex-grow">
+                            <div className="flex-shrink-0 bg-primary/20 text-primary rounded-full h-10 w-10 flex items-center justify-center">
+                                <CalendarIcon className="h-5 w-5" />
+                            </div>
+                            <div className="flex-grow">
+                                <p className="font-semibold text-foreground print-text-black capitalize">
+                                {format(apt.date, "EEEE d MMMM yyyy", { locale: fr })}
+                                </p>
+                                <p className="text-sm text-muted-foreground print-text-black">{displayDescription}</p>
+                            </div>
+                            {shiftAmount !== null && shiftAmount > 0 && (
+                                <Badge variant="secondary" className="flex items-center gap-1.5 no-print">
+                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                                Décalé de {shiftAmount} jour{shiftAmount > 1 ? 's' : ''}
+                                </Badge>
+                            )}
+                            </div>
+                            <div className="flex gap-1 no-print">
+                            <Button variant="ghost" size="icon" onClick={() => setEditingId(apt.id)}><Edit className="w-4 h-4"/></Button>
+                            <Button variant="ghost" size="icon" onClick={() => deleteAppointment(apt.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4"/></Button>
+                            </div>
+                        </>
+                        )}
+                    </motion.li>
+                    )})}
+                    </AnimatePresence>
+                </ul>
+            </div>
+            <div className="flex items-center justify-center p-4 border-dashed border-2 rounded-lg no-print">
+                <Calendar
+                    mode="multiple"
+                    selected={appointmentDates}
+                    month={startDate}
+                    locale={fr}
+                    className="w-full"
+                />
+            </div>
         </CardContent>
         <Separator className="my-4 no-print" />
         <CardFooter className="justify-end gap-2 no-print">
