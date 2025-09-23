@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, User } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, User, Briefcase, Coffee, GraduationCap, Ship, Palmtree } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -22,11 +22,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { formSchema } from "@/lib/schema";
 import type { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -35,6 +34,14 @@ interface AppointmentFormProps {
   isLoading: boolean;
   initialData?: Partial<FormData>;
 }
+
+const daysOfWeek = [
+  { name: 'mardi', label: 'Mardi', icon: Briefcase },
+  { name: 'mercredi', label: 'Mercredi', icon: GraduationCap },
+  { name: 'jeudi', label: 'Jeudi', icon: Coffee },
+  { name: 'vendredi', label: 'Vendredi', icon: Palmtree },
+  { name: 'samedi', label: 'Samedi', icon: Ship },
+];
 
 export default function AppointmentForm({ onSuggest, isLoading, initialData }: AppointmentFormProps) {
   const form = useForm<FormData>({
@@ -46,11 +53,26 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
     },
   });
 
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+
   useEffect(() => {
     if (initialData) {
       form.reset(initialData);
+      const preferences = initialData.patientPreferences || '';
+      const days = daysOfWeek.filter(day => preferences.includes(`not on ${day.name}`)).map(day => day.name);
+      setSelectedDays(days);
     }
   }, [initialData, form]);
+
+  const handleDayToggle = (dayName: string) => {
+    const newSelectedDays = selectedDays.includes(dayName)
+      ? selectedDays.filter((d) => d !== dayName)
+      : [...selectedDays, dayName];
+    
+    setSelectedDays(newSelectedDays);
+    const preferences = newSelectedDays.map(day => `not on ${day}`).join(', ');
+    form.setValue('patientPreferences', preferences);
+  };
 
   function onSubmit(data: FormData) {
     onSuggest(data);
@@ -126,14 +148,26 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
             <FormField
               control={form.control}
               name="patientPreferences"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Préférences du patient (optionnel)</FormLabel>
+                  <FormLabel>Jours à éviter (optionnel)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Ex: 'Pas le mardi', 'Seulement le matin', 'Pas les week-ends'..."
-                      {...field}
-                    />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-2">
+                      {daysOfWeek.map(day => {
+                        const Icon = day.icon;
+                        return (
+                        <Button
+                          key={day.name}
+                          type="button"
+                          variant={selectedDays.includes(day.name) ? 'primary' : 'outline'}
+                          onClick={() => handleDayToggle(day.name)}
+                          className="flex flex-col h-20 gap-2"
+                        >
+                          <Icon className="w-6 h-6" />
+                          <span>{day.label}</span>
+                        </Button>
+                      )})}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
