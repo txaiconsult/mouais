@@ -236,7 +236,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                   Génération...
                 </>
               ) : (
-                "Suggérer les rendez-vous"
+                "Générer le parcours"
               )}
             </Button>
           </form>
