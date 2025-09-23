@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -78,7 +78,6 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   const handlePreferenceChange = (day: string, time: TimePreference) => {
     const newSelectedPrefs = { ...selectedPreferences };
 
-    // If clicking the same preference again, deselect it
     if (newSelectedPrefs[day] === time) {
       delete newSelectedPrefs[day];
     } else {
@@ -96,6 +95,12 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   
   function onSubmit(data: FormData) {
     onSuggest(data);
+  }
+
+  const handleResetPreferences = () => {
+    setSelectedPreferences({});
+    setActiveDay(null);
+    form.setValue('patientPreferences', '', { shouldValidate: true });
   }
 
   return (
@@ -154,7 +159,15 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
               name="patientPreferences"
               render={() => (
                 <FormItem>
-                  <FormLabel className="text-xl">Jours de rendez-vous préférés (optionnel)</FormLabel>
+                  <div className="flex justify-between items-center">
+                    <FormLabel className="text-xl">Jours de rendez-vous préférés (optionnel)</FormLabel>
+                    {Object.keys(selectedPreferences).length > 0 && (
+                      <Button variant="ghost" size="sm" onClick={handleResetPreferences} className="text-sm">
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        Réinitialiser
+                      </Button>
+                    )}
+                  </div>
                   <FormControl>
                     <div className="grid grid-cols-2 md:grid-cols-2 gap-4 pt-2">
                       {daysOfWeek.map(day => (
@@ -172,7 +185,6 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
                                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                                // Stop propagation to prevent card click from closing the options
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {day.name !== 'samedi' && (
