@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw, CheckCircle, User, ShieldCheck, Users, ChevronRight, Search, UserRoundPlus } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw, CheckCircle, User, ShieldCheck, Users, ChevronRight, Search, UserRoundPlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -29,12 +29,24 @@ import { useEffect, useState, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Separator } from "./ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type FormData = z.infer<typeof formSchema>;
 
 interface AppointmentFormProps {
   onSuggest: (data: FormData) => void;
   onLoadPatient: (patientData: SavedPatientData) => void;
+  onDeletePatient: (patientName: string) => void;
   isLoading: boolean;
   initialData?: Partial<FormData>;
   savedPatients: SavedPatientData[];
@@ -55,7 +67,7 @@ const preferenceLabels: Record<TimePreference, string> = {
   'toute la journée': 'Journée'
 };
 
-export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, initialData, savedPatients }: AppointmentFormProps) {
+export default function AppointmentForm({ onSuggest, onLoadPatient, onDeletePatient, isLoading, initialData, savedPatients }: AppointmentFormProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -159,10 +171,10 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, i
                 {filteredPatients.length > 0 ? (
                   <ul className="space-y-2">
                     {filteredPatients.map((patient) => (
-                      <li key={patient.patientName}>
+                      <li key={patient.patientName} className="flex items-center gap-2 group">
                         <button
                           onClick={() => handlePatientClick(patient)}
-                          className="w-full text-left p-4 rounded-md bg-background hover:bg-muted transition-colors flex justify-between items-center group"
+                          className="w-full text-left p-4 rounded-md bg-background hover:bg-muted transition-colors flex justify-between items-center"
                         >
                           <div>
                             <p className="font-semibold text-foreground">{patient.patientName}</p>
@@ -172,6 +184,27 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, i
                           </div>
                           <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                         </button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="shrink-0 text-destructive opacity-50 group-hover:opacity-100">
+                              <Trash2 className="w-5 h-5"/>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ce patient ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Cette action est irréversible. Le planning de <strong>{patient.patientName}</strong> sera définitivement supprimé.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => onDeletePatient(patient.patientName)} className="bg-destructive hover:bg-destructive/90">
+                                Supprimer
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </li>
                     ))}
                   </ul>
@@ -346,16 +379,7 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, i
                 
                 <Separator />
 
-                <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="p-4 rounded-lg border-2 border-dashed bg-primary/5 text-sm max-w-md">
-                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-primary">
-                          <ShieldCheck className="w-5 h-5"/>
-                          Traitement des données
-                      </h4>
-                      <p className="text-muted-foreground">
-                          Les informations sont utilisées uniquement pour générer le calendrier de suivi et sont sauvegardées localement sur cet appareil pour un accès futur.
-                      </p>
-                  </div>
+                <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-4">
                   <Button type="submit" className="w-full sm:w-auto h-16 text-2xl font-bold" disabled={isLoading}>
                     {isLoading ? (
                       <>

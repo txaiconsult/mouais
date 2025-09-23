@@ -43,16 +43,22 @@ export default function SchedulerPage() {
       }
 
       // Load all saved patients
-      const allPatientsData = localStorage.getItem(PATIENTS_STORAGE_KEY);
-      if (allPatientsData) {
-        const patients = JSON.parse(allPatientsData);
-        setSavedPatients(Object.values(patients).sort((a: any, b: any) => a.patientName.localeCompare(b.patientName)));
-      }
+      loadAllPatients();
 
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
     }
   }, []);
+
+  const loadAllPatients = () => {
+    const allPatientsData = localStorage.getItem(PATIENTS_STORAGE_KEY);
+    if (allPatientsData) {
+      const patients = JSON.parse(allPatientsData);
+      setSavedPatients(Object.values(patients).sort((a: any, b: any) => a.patientName.localeCompare(b.patientName)));
+    } else {
+      setSavedPatients([]);
+    }
+  }
   
   const savePatientData = (patientData: SavedPatientData) => {
     try {
@@ -60,15 +66,41 @@ export default function SchedulerPage() {
       const allPatients = allPatientsData ? JSON.parse(allPatientsData) : {};
       allPatients[patientData.patientName.toLowerCase()] = patientData;
       localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(allPatients));
+      
       // Refresh patient list in UI
-      const sortedPatients = Object.values(allPatients).sort((a: any, b: any) => a.patientName.localeCompare(b.patientName));
-      setSavedPatients(sortedPatients as SavedPatientData[]);
+      loadAllPatients();
+
     } catch (error) {
       console.error("Failed to save patient data", error);
       toast({
         variant: "destructive",
         title: "Erreur de sauvegarde",
         description: "Impossible d'enregistrer les données du patient.",
+      });
+    }
+  }
+
+  const handleDeletePatient = (patientNameToDelete: string) => {
+    try {
+      const allPatientsData = localStorage.getItem(PATIENTS_STORAGE_KEY);
+      const allPatients = allPatientsData ? JSON.parse(allPatientsData) : {};
+      delete allPatients[patientNameToDelete.toLowerCase()];
+      localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(allPatients));
+      
+      // Refresh patient list in UI
+      loadAllPatients();
+
+      toast({
+        title: "Patient supprimé",
+        description: `Le patient ${patientNameToDelete} a été supprimé avec succès.`,
+      });
+
+    } catch (error) {
+      console.error("Failed to delete patient data", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de suppression",
+        description: "Impossible de supprimer les données du patient.",
       });
     }
   }
@@ -160,6 +192,7 @@ export default function SchedulerPage() {
         }
       setInitialFormData(parsedData);
     }
+    loadAllPatients(); // Refresh patient list when going back to form
     setView("form");
   };
 
@@ -174,6 +207,7 @@ export default function SchedulerPage() {
             <AppointmentForm
               onSuggest={handleSuggest}
               onLoadPatient={handleLoadPatient}
+              onDeletePatient={handleDeletePatient}
               isLoading={isLoading}
               initialData={initialFormData}
               savedPatients={savedPatients}
