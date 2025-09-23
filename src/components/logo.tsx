@@ -17,8 +17,10 @@ export function Logo({ className, ...props }: LogoProps) {
       <defs>
         <linearGradient
           id="aaGradient"
-          gradientUnits="objectBoundingBox"
-          gradientTransform="rotate(45)"
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="100%"
         >
           <stop offset="0%" stopColor="#2196F3" />
           <stop offset="100%" stopColor="#FF4081" />
