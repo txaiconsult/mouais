@@ -66,7 +66,7 @@
     }
 
     .print-content .space-y-10 > * + * {
-        margin-top: 1rem !important; /* was space-y-10 -> 2.5rem */
+        margin-top: 1.5rem !important; /* was space-y-10 -> 2.5rem, increased for more air */
     }
 
     .print-content .info-card {
@@ -75,7 +75,7 @@
     }
     
     .print-content .mb-6 {
-        margin-bottom: 0.5rem !important; /* was 1.5rem */
+        margin-bottom: 0.75rem !important; /* was 1.5rem */
     }
     
     .print-content .space-y-4 > * + * {
@@ -92,10 +92,11 @@
     }
     
     .print-content .gap-4 {
-        gap: 0.5rem !important;
+        gap: 0.75rem !important;
     }
 
     .no-print, .no-print * {
         display: none !important;
     }
 }
+
