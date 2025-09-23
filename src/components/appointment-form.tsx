@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,6 +25,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { formSchema } from "@/lib/schema";
 import type { z } from "zod";
 import { useEffect, useState } from "react";
+import { Badge } from "./ui/badge";
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -33,6 +34,8 @@ interface AppointmentFormProps {
   isLoading: boolean;
   initialData?: Partial<FormData>;
 }
+
+type TimePreference = 'matin' | 'après-midi' | 'toute la journée';
 
 const daysOfWeek = [
   { name: 'mardi', label: 'Mardi' },
@@ -49,41 +52,52 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
       ...initialData,
     },
   });
-
-  const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+  
+  const [selectedPreferences, setSelectedPreferences] = useState<Record<string, TimePreference>>({});
 
   useEffect(() => {
-    if (initialData) {
+    if (initialData?.patientPreferences) {
+      const prefs = initialData.patientPreferences.replace('only on ', '').split(', ').filter(p => p);
+      const newSelectedPrefs: Record<string, TimePreference> = {};
+      prefs.forEach(p => {
+        const [day, ...timeParts] = p.split(' ');
+        const time = timeParts.join(' ') as TimePreference;
+        if (day && time) {
+          newSelectedPrefs[day] = time;
+        }
+      });
+      setSelectedPreferences(newSelectedPrefs);
       form.reset(initialData);
-      const preferences = initialData.patientPreferences || '';
-      if (preferences.startsWith('only on')) {
-        const prefs = preferences.replace('only on ', '').split(', ').filter(p => p);
-        setSelectedPreferences(prefs);
-      } else {
-        setSelectedPreferences([]);
-      }
+    } else {
+      setSelectedPreferences({});
+      form.reset(initialData);
     }
   }, [initialData, form]);
 
-  const handlePreferenceToggle = (day: string, time: 'matin' | 'après-midi' | 'toute la journée') => {
-    const preference = `${day} ${time}`;
-    let newSelectedPrefs = [...selectedPreferences];
+  const handlePreferenceChange = (day: string, time: TimePreference | null) => {
+    const newSelectedPrefs = { ...selectedPreferences };
 
-    const isAlreadySelected = newSelectedPrefs.includes(preference);
-
-    // First, remove any existing preferences for the same day
-    newSelectedPrefs = newSelectedPrefs.filter(p => !p.startsWith(day));
-
-    // If the clicked preference was not the one already selected, add it
-    if (!isAlreadySelected) {
-      newSelectedPrefs.push(preference);
+    if (time === null) {
+      delete newSelectedPrefs[day];
+    } else {
+      newSelectedPrefs[day] = time;
     }
     
     setSelectedPreferences(newSelectedPrefs);
-    const preferencesString = newSelectedPrefs.length > 0 ? `only on ${newSelectedPrefs.join(', ')}` : '';
-    form.setValue('patientPreferences', preferencesString, { shouldValidate: true });
+    
+    const preferencesString = Object.entries(newSelectedPrefs)
+      .map(([day, time]) => `${day} ${time}`)
+      .join(', ');
+      
+    form.setValue('patientPreferences', preferencesString ? `only on ${preferencesString}` : '', { shouldValidate: true });
   };
-
+  
+  const getBadgeLabel = (time: TimePreference | undefined) => {
+    if (!time) return null;
+    if (time === 'toute la journée') return 'Journée';
+    if (time === 'après-midi') return 'A-Midi';
+    return time.charAt(0).toUpperCase() + time.slice(1);
+  }
 
   function onSubmit(data: FormData) {
     onSuggest(data);
@@ -147,44 +161,64 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                 <FormItem>
                   <FormLabel className="text-xl">Jours de rendez-vous préférés (optionnel)</FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 pt-2">
                       {daysOfWeek.map(day => (
-                        <div key={day.name} className="flex flex-col gap-3 p-4 rounded-lg border bg-card/50">
-                          <p className="font-medium text-2xl text-center capitalize">{day.label}</p>
-                          <div className="grid grid-cols-1 gap-3">
-                            {day.name !== 'samedi' && (
-                              <Button
-                                type="button"
-                                variant={selectedPreferences.includes(`${day.name} toute la journée`) ? 'default' : 'outline'}
-                                onClick={() => handlePreferenceToggle(day.name, 'toute la journée')}
-                                className="h-14 text-lg flex items-center justify-center gap-3"
-                              >
-                                <Clock className="w-6 h-6" />
-                                <span>Toute la journée</span>
-                              </Button>
-                            )}
+                        <Popover key={day.name}>
+                          <PopoverTrigger asChild>
                             <Button
                               type="button"
-                              variant={selectedPreferences.includes(`${day.name} matin`) ? 'default' : 'outline'}
-                              onClick={() => handlePreferenceToggle(day.name, 'matin')}
-                              className="h-14 text-lg flex items-center justify-center gap-3"
+                              variant={selectedPreferences[day.name] ? 'default' : 'outline'}
+                              className="h-24 text-2xl flex flex-col items-center justify-center gap-2"
                             >
-                              <Sunrise className="w-6 h-6" />
-                              <span>Matin</span>
+                              <span className="capitalize">{day.label}</span>
+                              {selectedPreferences[day.name] && <Badge variant="secondary">{getBadgeLabel(selectedPreferences[day.name])}</Badge>}
+                              <ChevronDown className="w-5 h-5 absolute bottom-2 right-2 text-muted-foreground" />
                             </Button>
-                            {day.name !== 'samedi' && (
+                          </PopoverTrigger>
+                          <PopoverContent className="w-60 p-2">
+                            <div className="flex flex-col gap-2">
+                              {day.name !== 'samedi' && (
+                                <Button
+                                  type="button"
+                                  variant={selectedPreferences[day.name] === 'toute la journée' ? 'default' : 'ghost'}
+                                  onClick={() => handlePreferenceChange(day.name, 'toute la journée')}
+                                  className="h-12 text-base flex items-center justify-start gap-3"
+                                >
+                                  <Clock className="w-5 h-5" />
+                                  <span>Toute la journée</span>
+                                </Button>
+                              )}
                               <Button
                                 type="button"
-                                variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'default' : 'outline'}
-                                onClick={() => handlePreferenceToggle(day.name, 'après-midi')}
-                                className="h-14 text-lg flex items-center justify-center gap-3"
+                                variant={selectedPreferences[day.name] === 'matin' ? 'default' : 'ghost'}
+                                onClick={() => handlePreferenceChange(day.name, 'matin')}
+                                className="h-12 text-base flex items-center justify-start gap-3"
                               >
-                                <Sunset className="w-6 h-6" />
-                                <span>Après-midi</span>
+                                <Sunrise className="w-5 h-5" />
+                                <span>Matin</span>
                               </Button>
-                            )}
-                          </div>
-                        </div>
+                              {day.name !== 'samedi' && (
+                                <Button
+                                  type="button"
+                                  variant={selectedPreferences[day.name] === 'après-midi' ? 'default' : 'ghost'}
+                                  onClick={() => handlePreferenceChange(day.name, 'après-midi')}
+                                  className="h-12 text-base flex items-center justify-start gap-3"
+                                >
+                                  <Sunset className="w-5 h-5" />
+                                  <span>Après-midi</span>
+                                </Button>
+                              )}
+                               <Button
+                                  type="button"
+                                  variant="destructive"
+                                  onClick={() => handlePreferenceChange(day.name, null)}
+                                  className="h-10 text-base mt-2"
+                                >
+                                  Effacer
+                                </Button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       ))}
                     </div>
                   </FormControl>
