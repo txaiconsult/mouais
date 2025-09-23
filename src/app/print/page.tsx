@@ -68,7 +68,7 @@ export default function PrintPage() {
   const { patientName, startDate, appointments } = data;
 
   return (
-    <div className="print-container min-h-screen w-full bg-background p-4 md:p-8 flex items-center justify-center print:block print:p-0">
+    <div className="print-container w-full bg-background p-4 md:p-8 flex items-center justify-center print:block print:p-0">
       <motion.div 
         className="w-full max-w-4xl"
         initial={{ opacity: 0, y: 20 }}
