@@ -98,12 +98,13 @@ export default function PrintPage() {
                   const [displayDescription, shiftInfo] = cleanDescriptionForDisplay(apt.description);
                   return (
                     <li key={apt.id} className="relative">
-                      <div className="p-4 rounded-lg border bg-card/80 flex items-start gap-4">
-                        <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background border-2 border-primary flex items-center justify-center">
-                          <CalendarIcon className="h-4 w-4 text-primary" />
-                        </div>
+                      <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background border-2 border-primary flex items-center justify-center print:hidden">
+                        <CalendarIcon className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="p-4 rounded-lg border bg-card/80">
                         <div className="flex-grow">
-                          <p className="font-semibold text-lg text-foreground capitalize mb-2">
+                          <p className="font-semibold text-lg text-foreground capitalize mb-2 flex items-center gap-3">
+                             <CalendarIcon className="h-5 w-5 text-primary" />
                             {format(new Date(apt.date), "EEEE d MMMM yyyy", { locale: fr })}
                           </p>
                           <div className="flex justify-between items-center text-base text-muted-foreground">
