@@ -8,8 +8,6 @@ import AppointmentSchedule from "@/components/appointment-schedule";
 import { getSuggestedAppointments } from "@/app/actions";
 import type { z } from "zod";
 import { formSchema } from "@/lib/schema";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
 import { Logo } from "./logo";
 import Loading from "@/app/loading";
 
@@ -103,11 +101,8 @@ export default function SchedulerPage() {
     setView("form");
   };
 
-  // On initial server render, this can return null or a basic shell,
-  // as the useEffect will kick in on the client to render the actual content.
-  // This helps prevent hydration mismatches with localStorage.
   if (!isClient) {
-    return null; 
+    return <Loading />; 
   }
 
   return (
