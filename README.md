@@ -37,7 +37,10 @@ ScheduleWise est une application web qui permet de planifier des rendez-vous de 
     ```
 
 3.  **Configurer les variables d'environnement**
-    Créez un fichier `.env` à la racine du projet et ajoutez les variables nécessaires (si besoin, basé sur `.env.example`). Pour le développement local avec Genkit, aucune clé d'API n'est généralement requise au départ.
+    Créez un fichier `.env` à la racine du projet et ajoutez votre clé API Gemini. Pour le développement local avec Genkit, une clé d'API est nécessaire pour utiliser les modèles Google AI.
+    ```
+    GEMINI_API_KEY=VOTRE_CLE_API_ICI
+    ```
 
 4.  **Lancer le serveur de développement**
     ```bash
