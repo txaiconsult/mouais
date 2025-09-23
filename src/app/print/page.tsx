@@ -82,7 +82,7 @@ export default function PrintPage() {
               <span className="sr-only">Retour</span>
             </Button>
           </div>
-          <CardHeader className="text-center relative pt-8 md:pt-12">
+          <CardHeader className="text-center relative">
             <CardTitle className="font-headline text-3xl md:text-4xl">
               Vos <span style={gradientStyle}>actives</span> dates clefs, <span className="text-primary">{patientName}</span>
             </CardTitle>
@@ -91,7 +91,7 @@ export default function PrintPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 md:p-10">
-            <div className="relative pl-8 mb-12">
+            <div className="relative pl-8 mt-8 mb-12">
               <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border -z-10"></div>
               <ul className="space-y-10">
                 {appointments.map((apt) => {
