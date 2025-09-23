@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {format, addDays, isWeekend, getDay} from 'date-fns';
+import {format, addDays, isWeekend, getDay, isSameDay} from 'date-fns';
 
 const SuggestAppointmentDatesInputSchema = z.object({
   startDate: z
@@ -52,7 +52,8 @@ You must adhere to the following rules:
 2.  If the patient has specified preferred days and times (e.g., "only on mardi matin, jeudi après-midi"), you MUST adjust each calculated date to the next available preferred day.
 3.  When a date is adjusted, you must use the time preference (matin, après-midi, or toute la journée) in the appointment description.
 4.  If no preferred days are given, ensure that the suggested dates do not fall on a Saturday or Sunday. If a calculated date falls on a weekend, move it to the next Monday.
-5.  The patient name is {{{patientName}}}.
+5.  If a date has been adjusted, reflect this in the description (e.g., by indicating the base interval like "base J+7").
+6.  The patient name is {{{patientName}}}.
 
 Here's the input information:
 
@@ -86,10 +87,10 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
     const appointmentDates = [];
     const intervals = [7, 14, 21, 30];
     const baseDescriptions = [
-        `Rendez-vous #1 (J+7)`,
-        `Rendez-vous #2 (J+14)`,
-        `Rendez-vous #3 (J+21)`,
-        `Rendez-vous #4 (J+30 & Facturation)`
+        `Rendez-vous #1`,
+        `Rendez-vous #2`,
+        `Rendez-vous #3`,
+        `Rendez-vous #4 & Facturation`
     ];
     
     const preferences = input.patientPreferences?.toLowerCase() || '';
@@ -117,13 +118,17 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
     };
 
     for (let i = 0; i < intervals.length; i++) {
-      let targetDate = addDays(startDate, intervals[i]);
+      const initialTargetDate = addDays(startDate, intervals[i]);
+      let targetDate = new Date(initialTargetDate);
       
       while (isDateInvalid(targetDate)) {
         targetDate = addDays(targetDate, 1);
       }
 
-      let description = baseDescriptions[i];
+      const wasAdjusted = !isSameDay(initialTargetDate, targetDate);
+      const intervalLabel = wasAdjusted ? `(base J+${intervals[i]})` : `(J+${intervals[i]})`;
+      let description = `${baseDescriptions[i]} ${intervalLabel}`;
+      
       if (preferredSlots && preferredSlots.length > 0) {
         const day = getDay(targetDate);
         const slotsForDay = preferredSlots.filter(slot => slot.day === day);
