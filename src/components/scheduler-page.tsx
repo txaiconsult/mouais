@@ -104,13 +104,8 @@ export default function SchedulerPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-background p-4 md:p-8">
-      <header className="mb-8 flex items-center gap-4">
-        <Logo className="w-[200px] h-auto" />
-        <h1 className="text-3xl font-bold font-headline text-foreground sr-only">Active Audition Agenda</h1>
-      </header>
-
-      <main className="grid grid-cols-1 lg:gap-8 transition-all duration-500 ease-in-out">
+    <div className="min-h-screen w-full bg-background p-4 md:p-8 flex flex-col">
+      <main className="flex-grow grid grid-cols-1 lg:gap-8 transition-all duration-500 ease-in-out">
         <div className={`transition-all duration-500 ${view === 'schedule' ? 'lg:hidden' : 'lg:block'}`}>
           <AppointmentForm
             onSuggest={handleSuggest}
@@ -140,6 +135,12 @@ export default function SchedulerPage() {
           )}
         </div>
       </main>
+      <footer className="mt-12 flex flex-col items-center justify-center gap-2">
+        <div className="flex items-center gap-3">
+          <Logo className="w-[150px] h-auto opacity-60" />
+        </div>
+        <p className="text-xs text-muted-foreground">Agenda de suivi auditif</p>
+      </footer>
     </div>
   );
 }
