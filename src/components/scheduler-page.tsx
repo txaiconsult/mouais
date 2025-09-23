@@ -45,7 +45,8 @@ export default function SchedulerPage() {
       // Load all saved patients
       const allPatientsData = localStorage.getItem(PATIENTS_STORAGE_KEY);
       if (allPatientsData) {
-        setSavedPatients(Object.values(JSON.parse(allPatientsData)));
+        const patients = JSON.parse(allPatientsData);
+        setSavedPatients(Object.values(patients).sort((a: any, b: any) => a.patientName.localeCompare(b.patientName)));
       }
 
     } catch (error) {
@@ -60,7 +61,8 @@ export default function SchedulerPage() {
       allPatients[patientData.patientName.toLowerCase()] = patientData;
       localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(allPatients));
       // Refresh patient list in UI
-      setSavedPatients(Object.values(allPatients));
+      const sortedPatients = Object.values(allPatients).sort((a: any, b: any) => a.patientName.localeCompare(b.patientName));
+      setSavedPatients(sortedPatients as SavedPatientData[]);
     } catch (error) {
       console.error("Failed to save patient data", error);
       toast({
@@ -120,6 +122,13 @@ export default function SchedulerPage() {
   };
 
   const handleLoadPatient = (patientData: SavedPatientData) => {
+    // Also save the loaded patient data as the "last used form data" for consistency
+    localStorage.setItem(LAST_FORM_STORAGE_KEY, JSON.stringify({
+      patientName: patientData.patientName,
+      startDate: patientData.startDate,
+      patientPreferences: patientData.patientPreferences,
+    }));
+    
     setPatientName(patientData.patientName);
     setStartDate(new Date(patientData.startDate));
     setAppointments(patientData.appointments.map(apt => ({...apt, date: new Date(apt.date) })));

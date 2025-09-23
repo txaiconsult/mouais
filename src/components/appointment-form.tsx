@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw, CheckCircle, User, ShieldCheck, Users, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock, RotateCcw, CheckCircle, User, ShieldCheck, Users, ChevronRight, Search, UserRoundPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,9 +25,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { formSchema, type SavedPatientData } from "@/lib/schema";
 import type { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Separator } from "./ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -66,6 +67,8 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, i
   
   const [selectedPreferences, setSelectedPreferences] = useState<Record<string, TimePreference>>({});
   const [activeDay, setActiveDay] = useState<string | null>(null);
+  const [patientSearch, setPatientSearch] = useState("");
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
 
   useEffect(() => {
     const initialPrefs = initialData?.patientPreferences;
@@ -114,77 +117,134 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, i
 
   const handlePatientClick = (patient: SavedPatientData) => {
     onLoadPatient(patient);
+    setIsPatientModalOpen(false);
   }
+  
+  const filteredPatients = useMemo(() => {
+    if (!patientSearch) return savedPatients;
+    return savedPatients.filter(p => p.patientName.toLowerCase().includes(patientSearch.toLowerCase()));
+  }, [patientSearch, savedPatients]);
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl">Étape 1 : Planification Patient</CardTitle>
-        <CardDescription className="text-lg">
-          Créez un nouveau parcours ou chargez un patient existant.
-        </CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="font-headline text-3xl">Étape 1 : Planification Patient</CardTitle>
+            <CardDescription className="text-lg">
+              Créez un nouveau parcours ou chargez un patient existant.
+            </CardDescription>
+          </div>
+          <Dialog open={isPatientModalOpen} onOpenChange={setIsPatientModalOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Users className="mr-2 h-5 w-5"/>
+                Charger un patient
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Charger un patient existant</DialogTitle>
+              </DialogHeader>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher un patient..."
+                  value={patientSearch}
+                  onChange={(e) => setPatientSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto p-1">
+                {filteredPatients.length > 0 ? (
+                  <ul className="space-y-2">
+                    {filteredPatients.map((patient) => (
+                      <li key={patient.patientName}>
+                        <button
+                          onClick={() => handlePatientClick(patient)}
+                          className="w-full text-left p-4 rounded-md bg-background hover:bg-muted transition-colors flex justify-between items-center group"
+                        >
+                          <div>
+                            <p className="font-semibold text-foreground">{patient.patientName}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Début: {format(new Date(patient.startDate), "d MMMM yyyy", { locale: fr })}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-center text-muted-foreground py-10">Aucun patient correspondant trouvé.</p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                 <FormField
-                  control={form.control}
-                  name="patientName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xl">Nom du patient</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                          <Input placeholder="Prénom Nom" {...field} className="pl-10 h-14 text-lg" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="startDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col gap-2">
-                      <FormLabel className="text-xl">Date de départ des appareils (J0)</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-4 text-left font-normal h-14 text-lg",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP", { locale: fr })
-                              ) : (
-                                <span>Choisissez une date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-5 w-5 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date("1900-01-01")}
-                            initialFocus
-                            locale={fr}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="patientName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xl">Nom du patient</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input placeholder="Prénom Nom" {...field} className="pl-10 h-14 text-lg" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel className="text-xl">Date de départ des appareils (J0)</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-4 text-left font-normal h-14 text-lg",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP", { locale: fr })
+                                ) : (
+                                  <span>Choisissez une date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-5 w-5 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date("1900-01-01")}
+                              initialFocus
+                              locale={fr}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                 </div>
                 <FormField
                   control={form.control}
                   name="patientPreferences"
@@ -200,7 +260,7 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, i
                         )}
                       </div>
                       <FormControl>
-                        <div className="grid grid-cols-2 md:grid-cols-2 gap-4 pt-2">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
                           {daysOfWeek.map(day => (
                             <div 
                               key={day.name} 
@@ -283,58 +343,36 @@ export default function AppointmentForm({ onSuggest, onLoadPatient, isLoading, i
                     </motion.div>
                   )}
                 </AnimatePresence>
+                
+                <Separator />
 
-                <div className="p-4 rounded-lg border-2 border-dashed bg-primary/5 text-sm">
-                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-primary">
-                        <ShieldCheck className="w-5 h-5"/>
-                        Traitement des données
-                    </h4>
-                    <p className="text-muted-foreground">
-                        Les informations sont utilisées uniquement pour générer le calendrier de suivi et sont sauvegardées localement sur cet appareil pour un accès futur.
-                    </p>
+                <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="p-4 rounded-lg border-2 border-dashed bg-primary/5 text-sm max-w-md">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-primary">
+                          <ShieldCheck className="w-5 h-5"/>
+                          Traitement des données
+                      </h4>
+                      <p className="text-muted-foreground">
+                          Les informations sont utilisées uniquement pour générer le calendrier de suivi et sont sauvegardées localement sur cet appareil pour un accès futur.
+                      </p>
+                  </div>
+                  <Button type="submit" className="w-full sm:w-auto h-16 text-2xl font-bold" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                        Génération...
+                      </>
+                    ) : (
+                      <>
+                        <UserRoundPlus className="mr-3 h-7 w-7"/>
+                        Créer le parcours
+                      </>
+                    )}
+                  </Button>
                 </div>
-
-                <Button type="submit" className="w-full h-16 text-2xl font-bold" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                      Génération...
-                    </>
-                  ) : (
-                    "Générer le parcours"
-                  )}
-                </Button>
               </form>
             </Form>
           </div>
-          <div className="flex flex-col">
-            <h3 className="text-xl font-semibold flex items-center gap-2 mb-4"><Users className="w-6 h-6 text-primary"/> Patients enregistrés</h3>
-            <div className="p-4 rounded-lg border bg-card/80 flex-grow">
-              {savedPatients.length > 0 ? (
-                <ul className="space-y-3">
-                  {savedPatients.map((patient) => (
-                    <li key={patient.patientName}>
-                      <button 
-                        onClick={() => handlePatientClick(patient)}
-                        className="w-full text-left p-4 rounded-md bg-background hover:bg-muted transition-colors flex justify-between items-center group"
-                      >
-                        <div>
-                          <p className="font-semibold text-foreground">{patient.patientName}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Début: {format(new Date(patient.startDate), "d MMMM yyyy", { locale: fr })}
-                          </p>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-center text-muted-foreground py-10">Aucun patient enregistré pour le moment.</p>
-              )}
-            </div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
