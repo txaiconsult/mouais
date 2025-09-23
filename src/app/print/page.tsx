@@ -97,17 +97,16 @@ export default function PrintPage() {
                           <CalendarIcon className="h-4 w-4 text-primary" />
                         </div>
                         <div className="flex-grow">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1">
                               <p className="font-semibold text-lg text-foreground capitalize">
                                 {format(new Date(apt.date), "EEEE d MMMM yyyy", { locale: fr })}
                               </p>
-                              <div className="flex items-center gap-2 text-muted-foreground mt-2 sm:mt-0">
-                                <Clock className="w-4 h-4" />
-                                <span className="font-semibold">Heure :</span>
-                                <span className="border-b-2 border-dotted border-current flex-grow min-w-[100px]"></span>
-                              </div>
+                              
                           </div>
-                          <p className="text-base text-muted-foreground">
+                           <div className="flex justify-center sm:justify-end">
+                                <span className="border-b-2 border-dotted border-current w-[150px]"></span>
+                           </div>
+                          <p className="text-base text-muted-foreground mt-2">
                             {displayDescription}
                             {shiftInfo && <span className="text-xs text-amber-700 ml-2 bg-amber-100 px-1.5 py-0.5 rounded-full">{shiftInfo}</span>}
                           </p>
@@ -166,5 +165,7 @@ export default function PrintPage() {
     </div>
   );
 }
+
+    
 
     
