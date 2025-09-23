@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, User, Sunrise, Sunset } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -46,7 +45,6 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      patientName: "",
       patientPreferences: "",
       ...initialData,
     },
@@ -82,9 +80,9 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Planification</CardTitle>
+        <CardTitle className="font-headline text-2xl">Étape 1 : Planification</CardTitle>
         <CardDescription>
-          Renseignez les informations pour générer les suggestions de rendez-vous.
+          Choisissez la date de départ et les jours de rendez-vous souhaités.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -165,22 +163,6 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                           </div>
                         </div>
                       ))}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="patientName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom et prénom du patient</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input placeholder="Ex: Jean Dupont" {...field} className="pl-10" />
                     </div>
                   </FormControl>
                   <FormMessage />

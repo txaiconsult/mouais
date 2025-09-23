@@ -6,7 +6,7 @@ import { fr } from "date-fns/locale";
 import type { Appointment } from "@/types/appointment";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, ArrowLeft, Plus, Printer, Trash2, Edit, Save } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, Plus, Printer, Trash2, Edit, Save, User, CheckCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -14,15 +14,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Separator } from "./ui/separator";
 
 interface AppointmentScheduleProps {
-  patientName: string;
+  initialPatientName: string;
   startDate: Date;
   initialAppointments: Appointment[];
   onBack: () => void;
+  onPatientNameChange: (name: string) => void;
 }
 
-export default function AppointmentSchedule({ patientName, startDate, initialAppointments, onBack }: AppointmentScheduleProps) {
+export default function AppointmentSchedule({ initialPatientName, startDate, initialAppointments, onBack, onPatientNameChange }: AppointmentScheduleProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [patientName, setPatientName] = useState(initialPatientName);
+  const [isNameValidated, setIsNameValidated] = useState(!!initialPatientName);
+  const [nameInputError, setNameInputError] = useState('');
 
   const handlePrint = () => {
     window.print();
@@ -55,6 +59,16 @@ export default function AppointmentSchedule({ patientName, startDate, initialApp
     setEditingId(newAppointment.id);
   };
 
+  const handleValidateName = () => {
+    if (patientName.trim().length < 2) {
+      setNameInputError("Le nom doit contenir au moins 2 caractères.");
+      return;
+    }
+    setNameInputError('');
+    setIsNameValidated(true);
+    onPatientNameChange(patientName);
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
       <Card className="w-full print-container">
@@ -62,7 +76,11 @@ export default function AppointmentSchedule({ patientName, startDate, initialApp
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="font-headline text-2xl print-text-black">
-                Calendrier pour <span className="text-primary print-text-black">{patientName}</span>
+                {isNameValidated ? (
+                   <>Calendrier pour <span className="text-primary print-text-black">{patientName}</span></>
+                ) : (
+                  "Étape 2 : Validation"
+                )}
               </CardTitle>
               <CardDescription className="print-text-black">
                 Départ des appareils le {format(startDate, "EEEE d MMMM yyyy", { locale: fr })}
@@ -76,6 +94,31 @@ export default function AppointmentSchedule({ patientName, startDate, initialApp
           </div>
         </CardHeader>
         <CardContent className="print-bg-white">
+          {!isNameValidated && (
+            <div className="p-4 mb-6 rounded-lg bg-accent/20 border border-accent/50 no-print">
+              <p className="font-semibold mb-2 text-foreground">Finalisez la planification</p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <div className="relative flex-grow w-full">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Nom et prénom du patient" 
+                    value={patientName}
+                    onChange={(e) => {
+                      setPatientName(e.target.value);
+                      if (nameInputError) setNameInputError('');
+                    }}
+                    className="pl-10 w-full"
+                  />
+                </div>
+                <Button onClick={handleValidateName} className="w-full sm:w-auto">
+                  <CheckCircle className="mr-2 h-4 w-4"/>
+                  Valider
+                </Button>
+              </div>
+              {nameInputError && <p className="text-sm font-medium text-destructive mt-2">{nameInputError}</p>}
+            </div>
+          )}
+
           <ul className="space-y-4">
             <AnimatePresence>
             {appointments.map((apt) => (
@@ -137,7 +180,7 @@ export default function AppointmentSchedule({ patientName, startDate, initialApp
             <Plus className="mr-2 h-4 w-4" />
             Ajouter un RDV
           </Button>
-          <Button onClick={handlePrint}>
+          <Button onClick={handlePrint} disabled={!isNameValidated}>
             <Printer className="mr-2 h-4 w-4" />
             Imprimer
           </Button>

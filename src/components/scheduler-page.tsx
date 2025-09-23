@@ -34,6 +34,7 @@ export default function SchedulerPage() {
           parsedData.startDate = new Date(parsedData.startDate);
         }
         setInitialFormData(parsedData);
+        // Do not set patientName from localStorage initially to follow the new flow
       }
     } catch (error) {
       console.error("Failed to load form data from localStorage", error);
@@ -43,11 +44,13 @@ export default function SchedulerPage() {
   const handleSuggest = async (data: FormData) => {
     setIsLoading(true);
     try {
+      // Save form data without patient name
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ ...data, startDate: data.startDate.toISOString() }));
 
       const result = await getSuggestedAppointments(data);
       if (result.success) {
-        setPatientName(result.patientName);
+        // We don't have patient name yet
+        setPatientName(''); 
         setStartDate(new Date(result.startDate));
         const suggestedAppointments = result.appointments.map(
           (apt, index) => ({
@@ -75,8 +78,27 @@ export default function SchedulerPage() {
       setIsLoading(false);
     }
   };
+  
+  const handlePatientNameChange = (name: string) => {
+    setPatientName(name);
+    // Persist patient name along with other form data
+    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if(savedData) {
+      const parsedData = JSON.parse(savedData);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ ...parsedData, patientName: name }));
+    }
+  };
 
   const handleBack = () => {
+    // When going back, restore the full form data including name if it exists
+    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+       if (parsedData.startDate) {
+          parsedData.startDate = new Date(parsedData.startDate);
+        }
+      setInitialFormData(parsedData);
+    }
     setView("form");
   };
 
@@ -108,10 +130,11 @@ export default function SchedulerPage() {
           )}
           {view === "schedule" && startDate && (
             <AppointmentSchedule
-              patientName={patientName}
+              initialPatientName={patientName}
               startDate={startDate}
               initialAppointments={appointments}
               onBack={handleBack}
+              onPatientNameChange={handlePatientNameChange}
             />
           )}
         </div>
