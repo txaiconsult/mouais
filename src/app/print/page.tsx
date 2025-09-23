@@ -82,7 +82,7 @@ export default function PrintPage() {
               <span className="sr-only">Retour</span>
             </Button>
           </div>
-          <CardHeader className="text-center relative">
+          <CardHeader className="text-center relative pt-8 md:pt-12">
             <CardTitle className="font-headline text-3xl md:text-4xl">
               Vos <span style={gradientStyle}>actives</span> dates clefs, <span className="text-primary">{patientName}</span>
             </CardTitle>

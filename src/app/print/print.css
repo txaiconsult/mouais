@@ -57,6 +57,10 @@
         padding-top: 0 !important;
     }
     
+    .print-content .mt-8 {
+        margin-top: 1.25rem !important;
+    }
+
     .print-content .mb-12 {
         margin-bottom: 1.25rem !important; /* was 3rem */
     }
