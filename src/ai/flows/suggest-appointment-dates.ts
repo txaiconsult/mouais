@@ -19,7 +19,7 @@ const SuggestAppointmentDatesInputSchema = z.object({
   patientPreferences: z
     .string()
     .optional()
-    .describe('Optional patient preferences regarding appointment dates (e.g., "only on tuesdays, thursdays").'),
+    .describe('Optional patient preferences regarding appointment days and times (e.g., "only on mardi matin, jeudi après-midi").'),
   patientName: z.string().describe('The name of the patient.'),
 });
 export type SuggestAppointmentDatesInput = z.infer<typeof SuggestAppointmentDatesInputSchema>;
@@ -28,7 +28,7 @@ const SuggestAppointmentDatesOutputSchema = z.object({
   appointmentDates: z.array(
     z.object({
       date: z.string().describe('The suggested appointment date in ISO format.'),
-      description: z.string().describe('A description of the appointment (e.g., "Appointment #1 (J+7)").'),
+      description: z.string().describe('A description of the appointment (e.g., "Appointment #1 (J+7) - Matin").'),
     })
   ).describe('An array of suggested appointment dates.'),
 });
@@ -44,14 +44,15 @@ const prompt = ai.definePrompt({
   output: {schema: SuggestAppointmentDatesOutputSchema},
   prompt: `You are an AI assistant specialized in scheduling follow-up appointments for patients.
 
-You will receive a starting date (J0) and optional patient preferences for preferred appointment days. Your task is to suggest four appointment dates based on the following sequence: J+7, J+14, J+21, and J+30.
+You will receive a starting date (J0) and optional patient preferences for preferred appointment days and times (matin/après-midi). Your task is to suggest four appointment dates based on the following sequence: J+7, J+14, J+21, and J+30.
 
 You must adhere to the following rules:
 
 1.  Calculate the dates exactly 7, 14, 21, and 30 days after the provided starting date (J0).
-2.  If the patient has specified preferred days (e.g., "only on tuesdays, thursdays"), you MUST adjust each calculated date to the next available preferred day.
-3.  If no preferred days are given, ensure that the suggested dates do not fall on a Saturday or Sunday. If a calculated date falls on a weekend, move it to the next Monday.
-4.  The patient name is {{{patientName}}}.
+2.  If the patient has specified preferred days and times (e.g., "only on mardi matin, jeudi après-midi"), you MUST adjust each calculated date to the next available preferred day.
+3.  When a date is adjusted, you must check if both "matin" and "après-midi" are available for that day. If only one is specified in the preferences, you must use it in the appointment description (e.g., "Mardi Matin"). If both are available, you can choose one, for example "Matin".
+4.  If no preferred days are given, ensure that the suggested dates do not fall on a Saturday or Sunday. If a calculated date falls on a weekend, move it to the next Monday.
+5.  The patient name is {{{patientName}}}.
 
 Here's the input information:
 
@@ -64,6 +65,16 @@ Return the suggested appointment dates in the following JSON format:
 `,
 });
 
+const dayNameToIndex: Record<string, number> = {
+  dimanche: 0,
+  lundi: 1,
+  mardi: 2,
+  mercredi: 3,
+  jeudi: 4,
+  vendredi: 5,
+  samedi: 6,
+};
+
 const suggestAppointmentDatesFlow = ai.defineFlow(
   {
     name: 'suggestAppointmentDatesFlow',
@@ -74,48 +85,56 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
     const startDate = new Date(input.startDate);
     const appointmentDates = [];
     const intervals = [7, 14, 21, 30];
-    const descriptions = [
-        `Appointment #1 (J+7)`,
-        `Appointment #2 (J+14)`,
-        `Appointment #3 (J+21)`,
-        `Appointment #4 (J+30 & Facturation)`
+    const baseDescriptions = [
+        `Rendez-vous #1 (J+7)`,
+        `Rendez-vous #2 (J+14)`,
+        `Rendez-vous #3 (J+21)`,
+        `Rendez-vous #4 (J+30 & Facturation)`
     ];
     
     const preferences = input.patientPreferences?.toLowerCase() || '';
-    let preferredDays: number[] | null = null;
+    let preferredSlots: {day: number, time: 'matin' | 'après-midi'}[] | null = null;
 
     if (preferences.startsWith('only on')) {
-      preferredDays = [];
-      if (preferences.includes('mardi')) preferredDays.push(2);
-      if (preferences.includes('mercredi')) preferredDays.push(3);
-      if (preferences.includes('jeudi')) preferredDays.push(4);
-      if (preferences.includes('vendredi')) preferredDays.push(5);
-      if (preferences.includes('samedi')) preferredDays.push(6);
+      preferredSlots = [];
+      const prefParts = preferences.replace('only on ', '').split(', ');
+      prefParts.forEach(part => {
+        const [dayName, time] = part.split(' ');
+        if (dayName in dayNameToIndex && (time === 'matin' || time === 'après-midi')) {
+          preferredSlots!.push({ day: dayNameToIndex[dayName], time });
+        }
+      });
     }
-    
-    const isDateInvalid = (date: Date): boolean => {
-      const day = getDay(date); // Sunday is 0, Monday is 1, ..., Saturday is 6
 
-      if (preferredDays) {
-        // If there are preferred days, any day not in the list is invalid
-        return !preferredDays.includes(day);
+    const isDateInvalid = (date: Date): boolean => {
+      const day = getDay(date);
+      if (preferredSlots && preferredSlots.length > 0) {
+        return !preferredSlots.some(slot => slot.day === day);
       }
-      
-      // If no preferred days, just avoid weekends (Sunday=0, Saturday=6)
-      return day === 0 || day === 6;
+      return isWeekend(date);
     };
 
     for (let i = 0; i < intervals.length; i++) {
       let targetDate = addDays(startDate, intervals[i]);
       
-      // Keep adding a day until the date is valid
       while (isDateInvalid(targetDate)) {
         targetDate = addDays(targetDate, 1);
       }
 
+      let description = baseDescriptions[i];
+      if (preferredSlots && preferredSlots.length > 0) {
+        const day = getDay(targetDate);
+        const slotsForDay = preferredSlots.filter(slot => slot.day === day);
+        if (slotsForDay.length > 0) {
+          // If morning is available (alone or with afternoon), prefer it. Otherwise, use afternoon.
+          const chosenTime = slotsForDay.some(s => s.time === 'matin') ? 'Matin' : 'Après-midi';
+          description += ` - ${chosenTime}`;
+        }
+      }
+
       appointmentDates.push({
         date: format(targetDate, 'yyyy-MM-dd'),
-        description: descriptions[i],
+        description: description,
       });
     }
 

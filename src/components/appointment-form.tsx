@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, User, Briefcase, Coffee, GraduationCap, Ship, Palmtree } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, User, Sunrise, Sunset } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -36,11 +36,11 @@ interface AppointmentFormProps {
 }
 
 const daysOfWeek = [
-  { name: 'mardi', label: 'Mardi', icon: Briefcase },
-  { name: 'mercredi', label: 'Mercredi', icon: GraduationCap },
-  { name: 'jeudi', label: 'Jeudi', icon: Coffee },
-  { name: 'vendredi', label: 'Vendredi', icon: Palmtree },
-  { name: 'samedi', label: 'Samedi', icon: Ship },
+  { name: 'mardi', label: 'Mardi' },
+  { name: 'mercredi', label: 'Mercredi' },
+  { name: 'jeudi', label: 'Jeudi' },
+  { name: 'vendredi', label: 'Vendredi' },
+  { name: 'samedi', label: 'Samedi' },
 ];
 
 export default function AppointmentForm({ onSuggest, isLoading, initialData }: AppointmentFormProps) {
@@ -53,27 +53,27 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
     },
   });
 
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
 
   useEffect(() => {
     if (initialData) {
       form.reset(initialData);
       const preferences = initialData.patientPreferences || '';
       if (preferences.startsWith('only on')) {
-        const days = daysOfWeek.filter(day => preferences.includes(day.name)).map(day => day.name);
-        setSelectedDays(days);
+        const prefs = preferences.replace('only on ', '').split(', ').filter(p => p);
+        setSelectedPreferences(prefs);
       }
     }
   }, [initialData, form]);
 
-  const handleDayToggle = (dayName: string) => {
-    const newSelectedDays = selectedDays.includes(dayName)
-      ? selectedDays.filter((d) => d !== dayName)
-      : [...selectedDays, dayName];
+  const handlePreferenceToggle = (preference: string) => {
+    const newSelectedPrefs = selectedPreferences.includes(preference)
+      ? selectedPreferences.filter((p) => p !== preference)
+      : [...selectedPreferences, preference];
     
-    setSelectedDays(newSelectedDays);
-    const preferences = newSelectedDays.length > 0 ? `only on ${newSelectedDays.join(', ')}` : '';
-    form.setValue('patientPreferences', preferences);
+    setSelectedPreferences(newSelectedPrefs);
+    const preferencesString = newSelectedPrefs.length > 0 ? `only on ${newSelectedPrefs.join(', ')}` : '';
+    form.setValue('patientPreferences', preferencesString);
   };
 
   function onSubmit(data: FormData) {
@@ -154,21 +154,32 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                 <FormItem>
                   <FormLabel>Jours de rendez-vous préférés (optionnel)</FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-2">
-                      {daysOfWeek.map(day => {
-                        const Icon = day.icon;
-                        return (
-                        <Button
-                          key={day.name}
-                          type="button"
-                          variant={selectedDays.includes(day.name) ? 'primary' : 'outline'}
-                          onClick={() => handleDayToggle(day.name)}
-                          className="flex flex-col h-20 gap-2"
-                        >
-                          <Icon className="w-6 h-6" />
-                          <span>{day.label}</span>
-                        </Button>
-                      )})}
+                    <div className="space-y-4 pt-2">
+                      {daysOfWeek.map(day => (
+                        <div key={day.name} className="flex flex-col gap-2 p-3 rounded-lg border bg-card/50">
+                          <p className="font-medium text-center capitalize">{day.label}</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              type="button"
+                              variant={selectedPreferences.includes(`${day.name} matin`) ? 'primary' : 'outline'}
+                              onClick={() => handlePreferenceToggle(`${day.name} matin`)}
+                              className="flex items-center gap-2"
+                            >
+                              <Sunrise className="w-4 h-4" />
+                              <span>Matin</span>
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'primary' : 'outline'}
+                              onClick={() => handlePreferenceToggle(`${day.name} après-midi`)}
+                              className="flex items-center gap-2"
+                            >
+                              <Sunset className="w-4 h-4" />
+                              <span>Après-midi</span>
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </FormControl>
                   <FormMessage />
