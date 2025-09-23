@@ -68,14 +68,14 @@ export default function PrintPage() {
   const { patientName, startDate, appointments } = data;
 
   return (
-    <div className="min-h-screen w-full bg-background p-4 md:p-8 flex items-center justify-center">
+    <div className="print-container min-h-screen w-full bg-background p-4 md:p-8 flex items-center justify-center print:block print:p-0">
       <motion.div 
         className="w-full max-w-4xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="w-full shadow-2xl">
+        <Card className="w-full shadow-2xl print:shadow-none print:border-none">
           <CardHeader className="text-center relative pt-8">
             <div className="absolute top-4 right-4">
               <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="no-print">

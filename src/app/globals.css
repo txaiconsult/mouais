@@ -95,6 +95,10 @@
     display: block !important;
   }
 
+  .print-container {
+    min-height: unset !important;
+  }
+
   @page {
     size: A4;
     margin: 1.5cm;
