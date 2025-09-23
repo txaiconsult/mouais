@@ -114,7 +114,7 @@ export default function PrintPage() {
             
             <div className="bg-primary/5 border border-primary/10 rounded-xl p-6">
                 <h3 className="font-headline text-2xl text-primary mb-2 flex items-center gap-2"><BrainCircuit className="w-6 h-6"/>Suivi J+7, J+14, J+21 et J+30 — pour une adaptation réussie</h3>
-                <p className="text-muted-foreground mb-6"><strong>Démarrage en douceur (volontaire):</strong> on commence en sous‑correction pour laisser votre cerveau se réhabituer sans fatigue ni gêne.</p>
+                <p className="text-muted-foreground mb-6"><strong>Un départ progressif pour une réussite commune :</strong> vos nouvelles aides auditives sont des outils performants. Le véritable succès vient de notre collaboration : vos retours et nos réglages précis transformeront votre confort d'écoute jour après jour.</p>
 
                 <ul className="space-y-4 mb-6">
                     <li className="flex items-start gap-3">
@@ -159,5 +159,3 @@ export default function PrintPage() {
     </div>
   );
 }
-
-    
