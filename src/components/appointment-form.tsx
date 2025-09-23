@@ -75,16 +75,14 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
     }
   }, [initialData, form]);
 
-  const handlePreferenceChange = (day: string, time: TimePreference | null) => {
+  const handlePreferenceChange = (day: string, time: TimePreference) => {
     const newSelectedPrefs = { ...selectedPreferences };
 
-    if (time === null || (newSelectedPrefs[day] === time && activeDay === day)) {
-       // If clicking the same preference again, deselect it
+    // If clicking the same preference again, deselect it
+    if (newSelectedPrefs[day] === time) {
       delete newSelectedPrefs[day];
-      setActiveDay(null);
     } else {
       newSelectedPrefs[day] = time;
-      setActiveDay(day); // Keep it active to show selection
     }
     
     setSelectedPreferences(newSelectedPrefs);
