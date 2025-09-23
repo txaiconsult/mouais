@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {format, addDays, isWeekend, getDay, isSameDay} from 'date-fns';
+import {format, addDays, isWeekend, getDay, isSameDay, differenceInDays} from 'date-fns';
 
 const SuggestAppointmentDatesInputSchema = z.object({
   startDate: z
@@ -52,7 +52,7 @@ You must adhere to the following rules:
 2.  If the patient has specified preferred days and times (e.g., "only on mardi matin, jeudi après-midi"), you MUST adjust each calculated date to the next available preferred day.
 3.  When a date is adjusted, you must use the time preference (matin, après-midi, or toute la journée) in the appointment description.
 4.  If no preferred days are given, ensure that the suggested dates do not fall on a Saturday or Sunday. If a calculated date falls on a weekend, move it to the next Monday.
-5.  If a date has been adjusted, reflect this in the description (e.g., by indicating the base interval like "base J+7").
+5.  If a date has been adjusted, reflect this in the description by indicating the base interval (e.g., "base J+7") and the number of days it was shifted.
 6.  The patient name is {{{patientName}}}.
 
 Here's the input information:
@@ -126,7 +126,12 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
       }
 
       const wasAdjusted = !isSameDay(initialTargetDate, targetDate);
-      const intervalLabel = wasAdjusted ? `(base J+${intervals[i]})` : `(J+${intervals[i]})`;
+      let intervalLabel = `(J+${intervals[i]})`;
+      if (wasAdjusted) {
+          const dayDifference = differenceInDays(targetDate, initialTargetDate);
+          intervalLabel = `(base J+${intervals[i]}, décalé de ${dayDifference} jour${dayDifference > 1 ? 's' : ''})`;
+      }
+
       let description = `${baseDescriptions[i]} ${intervalLabel}`;
       
       if (preferredSlots && preferredSlots.length > 0) {
