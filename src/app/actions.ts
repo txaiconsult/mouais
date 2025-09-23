@@ -18,11 +18,10 @@ export async function getSuggestedAppointments(
   }
 
   try {
-    const { startDate, patientPreferences } = validatedFields.data;
+    const { patientName, startDate, patientPreferences } = validatedFields.data;
     
-    // The patient name is now optional for the suggestion step
     const result = await suggestAppointmentDates({
-      patientName: 'Patient', // Use a placeholder
+      patientName: patientName,
       startDate: startDate.toISOString(),
       patientPreferences,
     });

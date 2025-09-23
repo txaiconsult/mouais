@@ -7,13 +7,14 @@ import AppointmentForm from "@/components/appointment-form";
 import AppointmentSchedule from "@/components/appointment-schedule";
 import { getSuggestedAppointments } from "@/app/actions";
 import type { z } from "zod";
-import { formSchema } from "@/lib/schema";
+import { formSchema, type SavedPatientData } from "@/lib/schema";
 import { Logo } from "./logo";
 import Loading from "@/app/loading";
 
 type FormData = z.infer<typeof formSchema>;
 
-const LOCAL_STORAGE_KEY = 'active-audition-agenda-form';
+const PATIENTS_STORAGE_KEY = 'active-audition-patients';
+const LAST_FORM_STORAGE_KEY = 'active-audition-agenda-form';
 
 export default function SchedulerPage() {
   const [isClient, setIsClient] = useState(false);
@@ -25,34 +26,59 @@ export default function SchedulerPage() {
   const { toast } = useToast();
 
   const [initialFormData, setInitialFormData] = useState<Partial<FormData>>({});
+  const [savedPatients, setSavedPatients] = useState<SavedPatientData[]>([]);
 
+  // Load data from localStorage on client-side mount
   useEffect(() => {
-    // This ensures localStorage is only accessed on the client
     setIsClient(true); 
     try {
-      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
+      // Load last used form data
+      const lastFormData = localStorage.getItem(LAST_FORM_STORAGE_KEY);
+      if (lastFormData) {
+        const parsedData = JSON.parse(lastFormData);
         if (parsedData.startDate) {
           parsedData.startDate = new Date(parsedData.startDate);
         }
         setInitialFormData(parsedData);
       }
+
+      // Load all saved patients
+      const allPatientsData = localStorage.getItem(PATIENTS_STORAGE_KEY);
+      if (allPatientsData) {
+        setSavedPatients(Object.values(JSON.parse(allPatientsData)));
+      }
+
     } catch (error) {
-      console.error("Failed to load form data from localStorage", error);
+      console.error("Failed to load data from localStorage", error);
     }
   }, []);
+  
+  const savePatientData = (patientData: SavedPatientData) => {
+    try {
+      const allPatientsData = localStorage.getItem(PATIENTS_STORAGE_KEY);
+      const allPatients = allPatientsData ? JSON.parse(allPatientsData) : {};
+      allPatients[patientData.patientName.toLowerCase()] = patientData;
+      localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(allPatients));
+      // Refresh patient list in UI
+      setSavedPatients(Object.values(allPatients));
+    } catch (error) {
+      console.error("Failed to save patient data", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de sauvegarde",
+        description: "Impossible d'enregistrer les données du patient.",
+      });
+    }
+  }
 
   const handleSuggest = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // Save form data without patient name
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ ...data, startDate: data.startDate.toISOString() }));
+      // Save form data for pre-filling next time
+      localStorage.setItem(LAST_FORM_STORAGE_KEY, JSON.stringify({ ...data, startDate: data.startDate.toISOString() }));
 
       const result = await getSuggestedAppointments(data);
       if (result.success) {
-        setPatientName(''); 
-        setStartDate(new Date(result.startDate));
         const suggestedAppointments = result.appointments.map(
           (apt, index) => ({
             id: `${Date.now()}-${index}`,
@@ -60,8 +86,21 @@ export default function SchedulerPage() {
             description: apt.description,
           })
         );
+        
+        // Set state for schedule view
+        setPatientName(data.patientName); 
+        setStartDate(new Date(result.startDate));
         setAppointments(suggestedAppointments);
+        
+        // Save the newly generated schedule
+        savePatientData({
+          ...data,
+          startDate: result.startDate,
+          appointments: suggestedAppointments.map(a => ({...a, date: a.date.toISOString()}))
+        });
+
         setView("schedule");
+
       } else {
         toast({
           variant: "destructive",
@@ -79,18 +118,32 @@ export default function SchedulerPage() {
       setIsLoading(false);
     }
   };
-  
-  const handlePatientNameChange = (name: string) => {
-    setPatientName(name);
-    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if(savedData) {
-      const parsedData = JSON.parse(savedData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ ...parsedData, patientName: name }));
-    }
+
+  const handleLoadPatient = (patientData: SavedPatientData) => {
+    setPatientName(patientData.patientName);
+    setStartDate(new Date(patientData.startDate));
+    setAppointments(patientData.appointments.map(apt => ({...apt, date: new Date(apt.date) })));
+    setView('schedule');
+  };
+
+  const handleScheduleUpdate = (updatedAppointments: Appointment[]) => {
+     if (!patientName || !startDate) return;
+
+     setAppointments(updatedAppointments);
+
+     const savedData = localStorage.getItem(LAST_FORM_STORAGE_KEY);
+     const lastFormData = savedData ? JSON.parse(savedData) : {};
+     
+     savePatientData({
+       patientName,
+       startDate: startDate.toISOString(),
+       patientPreferences: lastFormData.patientPreferences || '',
+       appointments: updatedAppointments.map(a => ({...a, date: a.date.toISOString()}))
+     });
   };
 
   const handleBack = () => {
-    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const savedData = localStorage.getItem(LAST_FORM_STORAGE_KEY);
     if (savedData) {
       const parsedData = JSON.parse(savedData);
        if (parsedData.startDate) {
@@ -111,16 +164,18 @@ export default function SchedulerPage() {
         {view === 'form' ? (
             <AppointmentForm
               onSuggest={handleSuggest}
+              onLoadPatient={handleLoadPatient}
               isLoading={isLoading}
               initialData={initialFormData}
+              savedPatients={savedPatients}
             />
         ) : startDate && (
             <AppointmentSchedule
-              initialPatientName={patientName}
+              patientName={patientName}
               startDate={startDate}
               initialAppointments={appointments}
               onBack={handleBack}
-              onPatientNameChange={handlePatientNameChange}
+              onScheduleUpdate={handleScheduleUpdate}
             />
         )}
       </main>

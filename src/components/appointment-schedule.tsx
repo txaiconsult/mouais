@@ -6,32 +6,34 @@ import { fr } from "date-fns/locale";
 import type { Appointment } from "@/types/appointment";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, ArrowLeft, Plus, Printer, Trash2, Edit, Save, User, CheckCircle } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, Plus, Printer, Trash2, Edit, Save } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { AnimatePresence, motion } from "framer-motion";
 import { Separator } from "./ui/separator";
 import { useRouter } from "next/navigation";
+import type { SavedPatientData } from "@/lib/schema";
 
 interface AppointmentScheduleProps {
-  initialPatientName: string;
+  patientName: string;
   startDate: Date;
   initialAppointments: Appointment[];
   onBack: () => void;
-  onPatientNameChange: (name: string) => void;
+  onScheduleUpdate: (updatedAppointments: Appointment[]) => void;
 }
 
 const PRINT_STORAGE_KEY = 'active-audition-agenda-print-data';
 
-export default function AppointmentSchedule({ initialPatientName, startDate, initialAppointments, onBack, onPatientNameChange }: AppointmentScheduleProps) {
+export default function AppointmentSchedule({ patientName, startDate, initialAppointments, onBack, onScheduleUpdate }: AppointmentScheduleProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [patientName, setPatientName] = useState(initialPatientName);
-  const [isNameValidated, setIsNameValidated] = useState(!!initialPatientName);
-  const [nameInputError, setNameInputError] = useState('');
   const router = useRouter();
 
+  const updateAppointmentsAndNotify = (newAppointments: Appointment[]) => {
+    setAppointments(newAppointments);
+    onScheduleUpdate(newAppointments);
+  };
 
   const handlePrintView = () => {
     const printData = {
@@ -99,18 +101,18 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
         previousDate = currentDate;
     }
 
-    setAppointments(newAppointments);
+    updateAppointmentsAndNotify(newAppointments);
     setEditingId(null);
   };
   
   const updateAppointmentDescription = (id: string, description: string) => {
-    setAppointments(
-      appointments.map((apt) => (apt.id === id ? { ...apt, description } : apt))
-    );
+    const newAppointments = appointments.map((apt) => (apt.id === id ? { ...apt, description } : apt));
+    updateAppointmentsAndNotify(newAppointments);
   };
 
   const deleteAppointment = (id: string) => {
-    setAppointments(appointments.filter((apt) => apt.id !== id));
+    const newAppointments = appointments.filter((apt) => apt.id !== id);
+    updateAppointmentsAndNotify(newAppointments);
   };
 
   const addAppointment = () => {
@@ -119,18 +121,9 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
       date: new Date(),
       description: "Nouveau rendez-vous",
     };
-    setAppointments([...appointments, newAppointment]);
+    const newAppointments = [...appointments, newAppointment];
+    updateAppointmentsAndNotify(newAppointments);
     setEditingId(newAppointment.id);
-  };
-
-  const handleValidateName = () => {
-    if (patientName.trim().length < 2) {
-      setNameInputError("Le nom doit contenir au moins 2 caractères.");
-      return;
-    }
-    setNameInputError('');
-    setIsNameValidated(true);
-    onPatientNameChange(patientName);
   };
 
   const cleanDescriptionForDisplay = (description: string): [string, string | null] => {
@@ -138,8 +131,6 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
       let mainDesc = description.replace(/\(décalé de [+-]?\d+ jour(s?)\)/, '').trim();
       return [mainDesc, shiftMatch ? shiftMatch[0] : null];
   }
-
-  const appointmentDates = appointments.map(apt => new Date(apt.date));
 
   return (
     <>
@@ -154,43 +145,13 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                           </Button>
                       </div>
                       <CardTitle className="font-headline text-3xl">
-                          {isNameValidated ? (
-                              <>Voici le parcours de suivi de <span className="text-primary">{patientName}</span> !</>
-                          ) : (
-                              "Étape 2 : Votre parcours de suivi"
-                          )}
+                          Voici le parcours de suivi de <span className="text-primary">{patientName}</span> !
                       </CardTitle>
                       <CardDescription className="text-lg">
                           Départ des appareils le {format(startDate, "d MMMM yyyy", { locale: fr })}
                       </CardDescription>
                       </CardHeader>
                       <CardContent className="px-4 md:px-6">
-                          {!isNameValidated && (
-                              <div className="p-6 rounded-lg bg-primary/10 border border-primary/20 mb-8 text-center max-w-2xl mx-auto">
-                              <h3 className="font-semibold text-xl mb-3 text-primary">Finalisez pour imprimer</h3>
-                              <p className="text-muted-foreground mb-4">Entrez le nom du patient pour personnaliser et valider le calendrier.</p>
-                              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 max-w-md mx-auto">
-                                  <div className="relative flex-grow w-full">
-                                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                  <Input 
-                                      placeholder="Nom et prénom du patient" 
-                                      value={patientName}
-                                      onChange={(e) => {
-                                      setPatientName(e.target.value);
-                                      if (nameInputError) setNameInputError('');
-                                      }}
-                                      className="pl-10 w-full h-12 text-base"
-                                  />
-                                  </div>
-                                  <Button onClick={handleValidateName} className="w-full sm:w-auto h-12 text-base">
-                                  <CheckCircle className="mr-2 h-5 w-5"/>
-                                  Valider
-                                  </Button>
-                              </div>
-                              {nameInputError && <p className="text-sm font-medium text-destructive mt-2">{nameInputError}</p>}
-                              </div>
-                          )}
-                          
                           <div className="relative pl-8">
                           <div className="absolute left-4 top-0 bottom-0 w-0.5 timeline-line"></div>
 
@@ -261,7 +222,7 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                           <Plus className="mr-2 h-5 w-5" />
                           Ajouter un RDV manuel
                       </Button>
-                      <Button size="lg" onClick={handlePrintView} disabled={!isNameValidated} className="text-base font-bold">
+                      <Button size="lg" onClick={handlePrintView} className="text-base font-bold">
                           <Printer className="mr-2 h-5 w-5" />
                           Imprimer le parcours
                       </Button>
