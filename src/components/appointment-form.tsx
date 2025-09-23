@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { formSchema } from "@/app/actions";
+import { formSchema } from "@/lib/schema";
 import type { z } from "zod";
 import { useEffect } from "react";
 

@@ -7,7 +7,7 @@ import AppointmentForm from "@/components/appointment-form";
 import AppointmentSchedule from "@/components/appointment-schedule";
 import { getSuggestedAppointments } from "@/app/actions";
 import type { z } from "zod";
-import { formSchema } from "@/app/actions";
+import { formSchema } from "@/lib/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 
