@@ -8,7 +8,7 @@ import { fr } from "date-fns/locale";
 import type { Appointment } from "@/types/appointment";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Calendar as CalendarIcon, Info, CheckCircle, BrainCircuit } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, Info, BrainCircuit } from "lucide-react";
 import { motion } from "framer-motion";
 
 const PRINT_STORAGE_KEY = 'schedulewise-print-data';
@@ -72,7 +72,7 @@ export default function PrintPage() {
         <Card className="w-full shadow-2xl">
           <CardHeader className="text-center relative pt-8">
             <div className="absolute top-4 right-4">
-              <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
+              <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="no-print">
                 <ArrowLeft />
                 <span className="sr-only">Retour</span>
               </Button>
@@ -159,3 +159,5 @@ export default function PrintPage() {
     </div>
   );
 }
+
+    
