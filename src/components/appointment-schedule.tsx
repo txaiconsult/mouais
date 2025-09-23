@@ -192,7 +192,7 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                           )}
                           
                           <div className="relative pl-8">
-                          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                          <div className="absolute left-4 top-0 bottom-0 w-0.5 timeline-line"></div>
 
                           <ul className="space-y-6">
                               <AnimatePresence>
@@ -231,8 +231,8 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
                                       </div>
                                       ) : (
                                       <div className="p-4 rounded-lg border bg-card/80 flex items-center justify-between gap-4 group">
-                                          <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background border-2 border-primary flex items-center justify-center">
-                                              <CalendarIcon className="h-4 w-4 text-primary" />
+                                          <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full timeline-dot flex items-center justify-center text-white font-bold text-lg">
+                                              {index + 1}
                                           </div>
                                           <div className="flex-grow">
                                               <p className="font-semibold text-lg text-foreground capitalize">

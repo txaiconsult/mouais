@@ -79,6 +79,15 @@
   }
 }
 
+@layer utilities {
+  .timeline-line {
+    background: linear-gradient(to bottom, transparent 0%, hsl(var(--primary)) 20%, hsl(var(--accent)) 80%, transparent 100%);
+  }
+  .timeline-dot {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+}
+
 @media print {
   .no-print, .no-print * {
     display: none !important;

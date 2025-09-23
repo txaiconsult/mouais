@@ -92,14 +92,17 @@ export default function PrintPage() {
           </CardHeader>
           <CardContent className="p-6 md:p-10">
             <div className="relative pl-8 mb-12">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border -z-10"></div>
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 timeline-line -z-10"></div>
               <ul className="space-y-10">
-                {appointments.map((apt) => {
+                {appointments.map((apt, index) => {
                   const [displayDescription, shiftInfo] = cleanDescriptionForDisplay(apt.description);
                   return (
                     <li key={apt.id} className="relative">
-                      <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background border-2 border-primary flex items-center justify-center print:hidden">
-                        <CalendarIcon className="h-4 w-4 text-primary" />
+                       <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full timeline-dot flex items-center justify-center text-white font-bold text-lg print:hidden">
+                        {index + 1}
+                      </div>
+                       <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full timeline-dot items-center justify-center text-white font-bold text-lg hidden print:flex">
+                        {index + 1}
                       </div>
                       <div className="p-4 rounded-lg border bg-card/80">
                         <div className="flex-grow">
@@ -176,3 +179,4 @@ export default function PrintPage() {
     
 
     
+
