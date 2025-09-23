@@ -271,10 +271,7 @@ export default function AppointmentSchedule({ initialPatientName, startDate, ini
               
               <div className="hidden lg:block">
                   <Card>
-                      <CardHeader className="text-center pb-2">
-                          <CardTitle>Calendrier</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex justify-center">
+                      <CardContent className="flex justify-center p-0 pt-6">
                           <Calendar
                               mode="multiple"
                               selected={appointmentDates}
