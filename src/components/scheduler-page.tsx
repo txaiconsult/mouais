@@ -17,8 +17,9 @@ type FormData = z.infer<typeof formSchema>;
 
 const LOCAL_STORAGE_KEY = 'active-audition-agenda-form';
 
+// This is now an async component to allow for the artificial delay
 export default function SchedulerPage() {
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const [view, setView] = useState<"form" | "schedule">("form");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patientName, setPatientName] = useState("");
@@ -29,15 +30,8 @@ export default function SchedulerPage() {
   const [initialFormData, setInitialFormData] = useState<Partial<FormData>>({});
 
   useEffect(() => {
-    // Simulate loading for 2 seconds
-    const timer = setTimeout(() => {
-      setIsInitializing(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
+    // This ensures localStorage is only accessed on the client
+    setIsClient(true); 
     try {
       const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedData) {
@@ -46,7 +40,6 @@ export default function SchedulerPage() {
           parsedData.startDate = new Date(parsedData.startDate);
         }
         setInitialFormData(parsedData);
-        // Do not set patientName from localStorage initially to follow the new flow
       }
     } catch (error) {
       console.error("Failed to load form data from localStorage", error);
@@ -61,7 +54,6 @@ export default function SchedulerPage() {
 
       const result = await getSuggestedAppointments(data);
       if (result.success) {
-        // We don't have patient name yet
         setPatientName(''); 
         setStartDate(new Date(result.startDate));
         const suggestedAppointments = result.appointments.map(
@@ -93,7 +85,6 @@ export default function SchedulerPage() {
   
   const handlePatientNameChange = (name: string) => {
     setPatientName(name);
-    // Persist patient name along with other form data
     const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
     if(savedData) {
       const parsedData = JSON.parse(savedData);
@@ -102,7 +93,6 @@ export default function SchedulerPage() {
   };
 
   const handleBack = () => {
-    // When going back, restore the full form data including name if it exists
     const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (savedData) {
       const parsedData = JSON.parse(savedData);
@@ -114,8 +104,11 @@ export default function SchedulerPage() {
     setView("form");
   };
 
-  if (isInitializing) {
-    return <Loading />;
+  // On initial server render, this can return null or a basic shell,
+  // as the useEffect will kick in on the client to render the actual content.
+  // This helps prevent hydration mismatches with localStorage.
+  if (!isClient) {
+    return null; 
   }
 
   return (

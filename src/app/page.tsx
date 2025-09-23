@@ -1,5 +1,6 @@
 import SchedulerPage from "@/components/scheduler-page";
 
-export default function Home() {
+// Making this component async allows it to await the async SchedulerPage
+export default async function Home() {
   return <SchedulerPage />;
 }
