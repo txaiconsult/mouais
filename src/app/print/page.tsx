@@ -165,6 +165,10 @@ export default function PrintPage() {
             </div>
 
           </CardContent>
+          <footer className="mt-12 flex flex-col items-center justify-center gap-2">
+            <Logo className="w-[150px] h-auto opacity-60" />
+            <p className="text-xs text-muted-foreground">Agenda de suivi auditif</p>
+          </footer>
         </div>
     </div>
   );
