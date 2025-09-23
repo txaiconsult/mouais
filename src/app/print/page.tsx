@@ -76,15 +76,13 @@ export default function PrintPage() {
   return (
     <div className="print-container bg-background">
         <div className="print-content">
-          <header className="flex justify-between items-center mb-8 pt-4 h-14">
-            <div className="absolute top-4 right-4 no-print">
-              <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
-                <ArrowLeft />
-                <span className="sr-only">Retour</span>
-              </Button>
-            </div>
-          </header>
-          <CardHeader className="text-center relative pt-0">
+          <div className="absolute top-4 right-4 no-print">
+            <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
+              <ArrowLeft />
+              <span className="sr-only">Retour</span>
+            </Button>
+          </div>
+          <CardHeader className="text-center relative pt-8 md:pt-12">
             <CardTitle className="font-headline text-3xl md:text-4xl">
               Vos <span style={gradientStyle}>actives</span> dates clefs, <span className="text-primary">{patientName}</span>
             </CardTitle>
