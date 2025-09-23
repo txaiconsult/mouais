@@ -167,15 +167,17 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                               <Sunrise className="w-5 h-5" />
                               <span>Matin</span>
                             </Button>
-                            <Button
-                              type="button"
-                              variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'primary' : 'outline'}
-                              onClick={() => handlePreferenceToggle(`${day.name} après-midi`)}
-                              className="h-12 text-base flex items-center justify-center gap-2"
-                            >
-                              <Sunset className="w-5 h-5" />
-                              <span>Après-midi</span>
-                            </Button>
+                            {day.name !== 'samedi' && (
+                              <Button
+                                type="button"
+                                variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'primary' : 'outline'}
+                                onClick={() => handlePreferenceToggle(`${day.name} après-midi`)}
+                                className="h-12 text-base flex items-center justify-center gap-2"
+                              >
+                                <Sunset className="w-5 h-5" />
+                                <span>Après-midi</span>
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))}
