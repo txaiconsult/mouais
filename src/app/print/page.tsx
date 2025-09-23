@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar as CalendarIcon, Info, BrainCircuit } from "lucide-react";
 import './print.css';
+import { Logo } from "@/components/logo";
 
 const PRINT_STORAGE_KEY = 'active-audition-agenda-print-data';
 
@@ -68,13 +69,16 @@ export default function PrintPage() {
   return (
     <div className="print-container bg-background">
         <div className="print-content">
-          <CardHeader className="text-center relative pt-8">
+          <header className="flex justify-between items-center mb-8 pt-4">
+            <Logo className="w-[200px] h-auto" />
             <div className="absolute top-4 right-4 no-print">
               <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
                 <ArrowLeft />
                 <span className="sr-only">Retour</span>
               </Button>
             </div>
+          </header>
+          <CardHeader className="text-center relative pt-0">
             <CardTitle className="font-headline text-3xl md:text-4xl">
               Vos actives dates clefs, <span className="text-primary">{patientName}</span>
             </CardTitle>

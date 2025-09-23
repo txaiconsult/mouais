@@ -10,6 +10,7 @@ import type { z } from "zod";
 import { formSchema } from "@/lib/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
+import { Logo } from "./logo";
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -104,9 +105,9 @@ export default function SchedulerPage() {
 
   return (
     <div className="min-h-screen w-full bg-background p-4 md:p-8">
-      <header className="mb-8 flex items-center gap-2">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary"><path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        <h1 className="text-3xl font-bold font-headline text-foreground">Active Audition Agenda</h1>
+      <header className="mb-8 flex items-center gap-4">
+        <Logo className="w-[200px] h-auto" />
+        <h1 className="text-3xl font-bold font-headline text-foreground sr-only">Active Audition Agenda</h1>
       </header>
 
       <main className="grid grid-cols-1 lg:gap-8 transition-all duration-500 ease-in-out">
