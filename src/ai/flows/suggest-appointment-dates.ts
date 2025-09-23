@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {format, addDays, isWeekend, nextMonday, getDay, add, isSameDay} from 'date-fns';
+import {format, addDays, isWeekend, getDay} from 'date-fns';
 
 const SuggestAppointmentDatesInputSchema = z.object({
   startDate: z
@@ -19,7 +19,7 @@ const SuggestAppointmentDatesInputSchema = z.object({
   patientPreferences: z
     .string()
     .optional()
-    .describe('Optional patient preferences regarding appointment dates (e.g., "not on Tuesdays", "only in the morning").'),
+    .describe('Optional patient preferences regarding appointment dates (e.g., "only on tuesdays, thursdays").'),
   patientName: z.string().describe('The name of the patient.'),
 });
 export type SuggestAppointmentDatesInput = z.infer<typeof SuggestAppointmentDatesInputSchema>;
@@ -44,13 +44,13 @@ const prompt = ai.definePrompt({
   output: {schema: SuggestAppointmentDatesOutputSchema},
   prompt: `You are an AI assistant specialized in scheduling follow-up appointments for patients.
 
-You will receive a starting date (J0) and patient preferences. Your task is to suggest four appointment dates based on the following sequence: J+7, J+14, J+21, and J+30.
+You will receive a starting date (J0) and optional patient preferences for preferred appointment days. Your task is to suggest four appointment dates based on the following sequence: J+7, J+14, J+21, and J+30.
 
 You must adhere to the following rules:
 
 1.  Calculate the dates exactly 7, 14, 21, and 30 days after the provided starting date (J0).
-2.  Consider the patient preferences. If a calculated date conflicts with the preferences, adjust the date to the next available valid day.
-3.  If the preferences indicate "not on weekends", ensure that the suggested dates never fall on a Saturday or Sunday. If a calculated date falls on a weekend, move it to the next Monday.
+2.  If the patient has specified preferred days (e.g., "only on tuesdays, thursdays"), you MUST adjust each calculated date to the next available preferred day.
+3.  If no preferred days are given, ensure that the suggested dates do not fall on a Saturday or Sunday. If a calculated date falls on a weekend, move it to the next Monday.
 4.  The patient name is {{{patientName}}}.
 
 Here's the input information:
@@ -82,30 +82,33 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
     ];
     
     const preferences = input.patientPreferences?.toLowerCase() || '';
-    const avoidTuesday = preferences.includes('not on mardi');
-    const avoidWednesday = preferences.includes('not on mercredi');
-    const avoidThursday = preferences.includes('not on jeudi');
-    const avoidFriday = preferences.includes('not on vendredi');
-    const avoidSaturday = preferences.includes('not on samedi');
+    let preferredDays: number[] | null = null;
 
+    if (preferences.startsWith('only on')) {
+      preferredDays = [];
+      if (preferences.includes('mardi')) preferredDays.push(2);
+      if (preferences.includes('mercredi')) preferredDays.push(3);
+      if (preferences.includes('jeudi')) preferredDays.push(4);
+      if (preferences.includes('vendredi')) preferredDays.push(5);
+      if (preferences.includes('samedi')) preferredDays.push(6);
+    }
+    
     const isDateInvalid = (date: Date): boolean => {
       const day = getDay(date); // Sunday is 0, Monday is 1, ..., Saturday is 6
-      
-      if (isWeekend(date)) return true; // Always avoid weekends
-      if (day === 2 && avoidTuesday) return true;
-      if (day === 3 && avoidWednesday) return true;
-      if (day === 4 && avoidThursday) return true;
-      if (day === 5 && avoidFriday) return true;
-      if (day === 6 && avoidSaturday) return true;
-      
-      return false;
-    };
 
-    let lastDate = startDate;
+      if (preferredDays) {
+        // If there are preferred days, any day not in the list is invalid
+        return !preferredDays.includes(day);
+      }
+      
+      // If no preferred days, just avoid weekends (Sunday=0, Saturday=6)
+      return day === 0 || day === 6;
+    };
 
     for (let i = 0; i < intervals.length; i++) {
       let targetDate = addDays(startDate, intervals[i]);
       
+      // Keep adding a day until the date is valid
       while (isDateInvalid(targetDate)) {
         targetDate = addDays(targetDate, 1);
       }
@@ -114,7 +117,6 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
         date: format(targetDate, 'yyyy-MM-dd'),
         description: descriptions[i],
       });
-      lastDate = targetDate;
     }
 
     return {appointmentDates};

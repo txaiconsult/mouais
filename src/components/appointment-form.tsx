@@ -59,8 +59,10 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
     if (initialData) {
       form.reset(initialData);
       const preferences = initialData.patientPreferences || '';
-      const days = daysOfWeek.filter(day => preferences.includes(`not on ${day.name}`)).map(day => day.name);
-      setSelectedDays(days);
+      if (preferences.startsWith('only on')) {
+        const days = daysOfWeek.filter(day => preferences.includes(day.name)).map(day => day.name);
+        setSelectedDays(days);
+      }
     }
   }, [initialData, form]);
 
@@ -70,7 +72,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
       : [...selectedDays, dayName];
     
     setSelectedDays(newSelectedDays);
-    const preferences = newSelectedDays.map(day => `not on ${day}`).join(', ');
+    const preferences = newSelectedDays.length > 0 ? `only on ${newSelectedDays.join(', ')}` : '';
     form.setValue('patientPreferences', preferences);
   };
 
@@ -150,7 +152,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
               name="patientPreferences"
               render={() => (
                 <FormItem>
-                  <FormLabel>Jours à éviter (optionnel)</FormLabel>
+                  <FormLabel>Jours de rendez-vous préférés (optionnel)</FormLabel>
                   <FormControl>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-2">
                       {daysOfWeek.map(day => {
