@@ -147,7 +147,7 @@ export default function PrintPage() {
                         <p className="text-sm text-muted-foreground">entre chaque visite.</p>
                     </div>
                     <div className="bg-background/50 p-4 rounded-lg">
-                        <p className="font-semibold text-foreground">En cas d’imprévu, on reprogramme</p>
+                        <p className="font-semibold text-foreground">En cas d’imprévu, n'hésitez jamais à nous appeler pour reprogrammer</p>
                         <p className="text-sm text-muted-foreground">l’important est de garder la progression.</p>
                     </div>
                 </div>
