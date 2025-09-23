@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Sunrise, Sunset, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -63,15 +63,31 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
     }
   }, [initialData, form]);
 
-  const handlePreferenceToggle = (preference: string) => {
-    const newSelectedPrefs = selectedPreferences.includes(preference)
-      ? selectedPreferences.filter((p) => p !== preference)
-      : [...selectedPreferences, preference];
-    
+  const handlePreferenceToggle = (day: string, time: 'matin' | 'après-midi' | 'toute la journée') => {
+    const preference = `${day} ${time}`;
+    let newSelectedPrefs = [...selectedPreferences];
+
+    if (newSelectedPrefs.includes(preference)) {
+      // If it's already selected, remove it
+      newSelectedPrefs = newSelectedPrefs.filter(p => p !== preference);
+    } else {
+      // If it's not selected, add it
+      if (time === 'toute la journée') {
+        // If 'all day' is selected, remove 'morning' and 'afternoon' for that day
+        newSelectedPrefs = newSelectedPrefs.filter(p => !p.startsWith(day));
+        newSelectedPrefs.push(preference);
+      } else {
+        // If 'morning' or 'afternoon' is selected, remove 'all day' for that day
+        newSelectedPrefs = newSelectedPrefs.filter(p => p !== `${day} toute la journée`);
+        newSelectedPrefs.push(preference);
+      }
+    }
+
     setSelectedPreferences(newSelectedPrefs);
     const preferencesString = newSelectedPrefs.length > 0 ? `only on ${newSelectedPrefs.join(', ')}` : '';
-    form.setValue('patientPreferences', preferencesString);
+    form.setValue('patientPreferences', preferencesString, { shouldValidate: true });
   };
+
 
   function onSubmit(data: FormData) {
     onSuggest(data);
@@ -140,10 +156,19 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                         <div key={day.name} className="flex flex-col gap-2 p-3 rounded-lg border bg-card/50">
                           <p className="font-medium text-lg text-center capitalize">{day.label}</p>
                           <div className="grid grid-cols-1 gap-2">
+                             <Button
+                                type="button"
+                                variant={selectedPreferences.includes(`${day.name} toute la journée`) ? 'primary' : 'outline'}
+                                onClick={() => handlePreferenceToggle(day.name, 'toute la journée')}
+                                className="h-12 text-base flex items-center justify-center gap-2"
+                              >
+                                <Clock className="w-5 h-5" />
+                                <span>Toute la journée</span>
+                              </Button>
                             <Button
                               type="button"
                               variant={selectedPreferences.includes(`${day.name} matin`) ? 'primary' : 'outline'}
-                              onClick={() => handlePreferenceToggle(`${day.name} matin`)}
+                              onClick={() => handlePreferenceToggle(day.name, 'matin')}
                               className="h-12 text-base flex items-center justify-center gap-2"
                             >
                               <Sunrise className="w-5 h-5" />
@@ -153,7 +178,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                               <Button
                                 type="button"
                                 variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'primary' : 'outline'}
-                                onClick={() => handlePreferenceToggle(`${day.name} après-midi`)}
+                                onClick={() => handlePreferenceToggle(day.name, 'après-midi')}
                                 className="h-12 text-base flex items-center justify-center gap-2"
                               >
                                 <Sunset className="w-5 h-5" />

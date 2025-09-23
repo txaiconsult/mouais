@@ -19,7 +19,7 @@ const SuggestAppointmentDatesInputSchema = z.object({
   patientPreferences: z
     .string()
     .optional()
-    .describe('Optional patient preferences regarding appointment days and times (e.g., "only on mardi matin, jeudi après-midi").'),
+    .describe('Optional patient preferences regarding appointment days and times (e.g., "only on mardi matin, jeudi après-midi, vendredi toute la journée").'),
   patientName: z.string().describe('The name of the patient.'),
 });
 export type SuggestAppointmentDatesInput = z.infer<typeof SuggestAppointmentDatesInputSchema>;
@@ -44,13 +44,13 @@ const prompt = ai.definePrompt({
   output: {schema: SuggestAppointmentDatesOutputSchema},
   prompt: `You are an AI assistant specialized in scheduling follow-up appointments for patients.
 
-You will receive a starting date (J0) and optional patient preferences for preferred appointment days and times (matin/après-midi). Your task is to suggest four appointment dates based on the following sequence: J+7, J+14, J+21, and J+30.
+You will receive a starting date (J0) and optional patient preferences for preferred appointment days and times (matin/après-midi/toute la journée). Your task is to suggest four appointment dates based on the following sequence: J+7, J+14, J+21, and J+30.
 
 You must adhere to the following rules:
 
 1.  Calculate the dates exactly 7, 14, 21, and 30 days after the provided starting date (J0).
 2.  If the patient has specified preferred days and times (e.g., "only on mardi matin, jeudi après-midi"), you MUST adjust each calculated date to the next available preferred day.
-3.  When a date is adjusted, you must check if both "matin" and "après-midi" are available for that day. If only one is specified in the preferences, you must use it in the appointment description (e.g., "Mardi Matin"). If both are available, you can choose one, for example "Matin".
+3.  When a date is adjusted, you must use the time preference (matin, après-midi, or toute la journée) in the appointment description.
 4.  If no preferred days are given, ensure that the suggested dates do not fall on a Saturday or Sunday. If a calculated date falls on a weekend, move it to the next Monday.
 5.  The patient name is {{{patientName}}}.
 
@@ -93,14 +93,16 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
     ];
     
     const preferences = input.patientPreferences?.toLowerCase() || '';
-    let preferredSlots: {day: number, time: 'matin' | 'après-midi'}[] | null = null;
+    let preferredSlots: {day: number, time: 'matin' | 'après-midi' | 'toute la journée'}[] | null = null;
 
     if (preferences.startsWith('only on')) {
       preferredSlots = [];
       const prefParts = preferences.replace('only on ', '').split(', ');
       prefParts.forEach(part => {
-        const [dayName, time] = part.split(' ');
-        if (dayName in dayNameToIndex && (time === 'matin' || time === 'après-midi')) {
+        const parts = part.split(' ');
+        const dayName = parts[0];
+        const time = parts.slice(1).join(' ') as 'matin' | 'après-midi' | 'toute la journée';
+        if (dayName in dayNameToIndex && (time === 'matin' || time === 'après-midi' || time === 'toute la journée')) {
           preferredSlots!.push({ day: dayNameToIndex[dayName], time });
         }
       });
@@ -126,9 +128,10 @@ const suggestAppointmentDatesFlow = ai.defineFlow(
         const day = getDay(targetDate);
         const slotsForDay = preferredSlots.filter(slot => slot.day === day);
         if (slotsForDay.length > 0) {
-          // If morning is available (alone or with afternoon), prefer it. Otherwise, use afternoon.
-          const chosenTime = slotsForDay.some(s => s.time === 'matin') ? 'Matin' : 'Après-midi';
-          description += ` - ${chosenTime}`;
+          // Priority: all day > morning > afternoon
+          const chosenSlot = slotsForDay.find(s => s.time === 'toute la journée') || slotsForDay.find(s => s.time === 'matin') || slotsForDay[0];
+          const timeCapitalized = chosenSlot.time.charAt(0).toUpperCase() + chosenSlot.time.slice(1).replace(' la ', ' la ');
+          description += ` - ${timeCapitalized}`;
         }
       }
 
