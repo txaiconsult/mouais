@@ -59,6 +59,8 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
       if (preferences.startsWith('only on')) {
         const prefs = preferences.replace('only on ', '').split(', ').filter(p => p);
         setSelectedPreferences(prefs);
+      } else {
+        setSelectedPreferences([]);
       }
     }
   }, [initialData, form]);
@@ -67,22 +69,16 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
     const preference = `${day} ${time}`;
     let newSelectedPrefs = [...selectedPreferences];
 
-    if (newSelectedPrefs.includes(preference)) {
-      // If it's already selected, remove it
-      newSelectedPrefs = newSelectedPrefs.filter(p => p !== preference);
-    } else {
-      // If it's not selected, add it
-      if (time === 'toute la journée') {
-        // If 'all day' is selected, remove 'morning' and 'afternoon' for that day
-        newSelectedPrefs = newSelectedPrefs.filter(p => !p.startsWith(day));
-        newSelectedPrefs.push(preference);
-      } else {
-        // If 'morning' or 'afternoon' is selected, remove 'all day' for that day
-        newSelectedPrefs = newSelectedPrefs.filter(p => p !== `${day} toute la journée`);
-        newSelectedPrefs.push(preference);
-      }
-    }
+    const isAlreadySelected = newSelectedPrefs.includes(preference);
 
+    // First, remove any existing preferences for the same day
+    newSelectedPrefs = newSelectedPrefs.filter(p => !p.startsWith(day));
+
+    // If the clicked preference was not the one already selected, add it
+    if (!isAlreadySelected) {
+      newSelectedPrefs.push(preference);
+    }
+    
     setSelectedPreferences(newSelectedPrefs);
     const preferencesString = newSelectedPrefs.length > 0 ? `only on ${newSelectedPrefs.join(', ')}` : '';
     form.setValue('patientPreferences', preferencesString, { shouldValidate: true });
@@ -96,27 +92,27 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Étape 1 : Planification</CardTitle>
-        <CardDescription>
+        <CardTitle className="font-headline text-3xl">Étape 1 : Planification</CardTitle>
+        <CardDescription className="text-lg">
           Choisissez la date de départ et les jours de rendez-vous souhaités.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
               name="startDate"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date de départ des appareils (J0)</FormLabel>
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel className="text-xl">Date de départ des appareils (J0)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "w-full pl-3 text-left font-normal",
+                            "w-full pl-4 text-left font-normal h-14 text-lg",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -125,7 +121,7 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                           ) : (
                             <span>Choisissez une date</span>
                           )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          <CalendarIcon className="ml-auto h-5 w-5 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -149,29 +145,29 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
               name="patientPreferences"
               render={() => (
                 <FormItem>
-                  <FormLabel>Jours de rendez-vous préférés (optionnel)</FormLabel>
+                  <FormLabel className="text-xl">Jours de rendez-vous préférés (optionnel)</FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                       {daysOfWeek.map(day => (
-                        <div key={day.name} className="flex flex-col gap-2 p-3 rounded-lg border bg-card/50">
-                          <p className="font-medium text-lg text-center capitalize">{day.label}</p>
-                          <div className="grid grid-cols-1 gap-2">
+                        <div key={day.name} className="flex flex-col gap-3 p-4 rounded-lg border bg-card/50">
+                          <p className="font-medium text-2xl text-center capitalize">{day.label}</p>
+                          <div className="grid grid-cols-1 gap-3">
                              <Button
                                 type="button"
                                 variant={selectedPreferences.includes(`${day.name} toute la journée`) ? 'default' : 'outline'}
                                 onClick={() => handlePreferenceToggle(day.name, 'toute la journée')}
-                                className="h-12 text-base flex items-center justify-center gap-2"
+                                className="h-14 text-lg flex items-center justify-center gap-3"
                               >
-                                <Clock className="w-5 h-5" />
+                                <Clock className="w-6 h-6" />
                                 <span>Toute la journée</span>
                               </Button>
                             <Button
                               type="button"
                               variant={selectedPreferences.includes(`${day.name} matin`) ? 'default' : 'outline'}
                               onClick={() => handlePreferenceToggle(day.name, 'matin')}
-                              className="h-12 text-base flex items-center justify-center gap-2"
+                              className="h-14 text-lg flex items-center justify-center gap-3"
                             >
-                              <Sunrise className="w-5 h-5" />
+                              <Sunrise className="w-6 h-6" />
                               <span>Matin</span>
                             </Button>
                             {day.name !== 'samedi' && (
@@ -179,9 +175,9 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                                 type="button"
                                 variant={selectedPreferences.includes(`${day.name} après-midi`) ? 'default' : 'outline'}
                                 onClick={() => handlePreferenceToggle(day.name, 'après-midi')}
-                                className="h-12 text-base flex items-center justify-center gap-2"
+                                className="h-14 text-lg flex items-center justify-center gap-3"
                               >
-                                <Sunset className="w-5 h-5" />
+                                <Sunset className="w-6 h-6" />
                                 <span>Après-midi</span>
                               </Button>
                             )}
@@ -194,11 +190,11 @@ export default function AppointmentForm({ onSuggest, isLoading, initialData }: A
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full h-12 text-lg" disabled={isLoading}>
+            <Button type="submit" className="w-full h-16 text-2xl font-bold" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Génération en cours...
+                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                  Génération...
                 </>
               ) : (
                 "Suggérer les rendez-vous"
